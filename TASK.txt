@@ -1,0 +1,71 @@
+// Funkcionalumai:
+    Susikurti naują vartotoją (registruotis)
+    Prisijungti su egzistuojančiu vartotoju
+    Atnaujinti prisijungusio vartotojo: nuotrauką, vartotojo vardą ir slaptažodį
+    Peržiūrėti visus vartotojus aplikacijoje
+    Peržiūrėti vieno specifinio vartotojo puslapį
+    Siūsti žinutę kitam vartotojui
+    Peržiūrėti visus prisijungusio vartotojo pokalbius
+    Ištrinti vieną iš prisijungusio vartotojo pokalbių
+
+// Puslapiai
+
+    Registracija / Register (menu nesimato neprisijungusiam)
+    Vartotojas norėdamas susikurti naują paskyrą turi suvesti: 
+        username - nuo 5 iki 20 simbolių
+        profileImage - nuotrauka (url arba iš kompiuterio), nebūtina, tuomet naudojama default
+        password - nuo 5 iki 20 simbolių, viena didžioji, viena mažoji, vienas skaičius ir vienas specialus simbolis (!@#$%^&*_+)
+        passwordRepeat - toks pat kaip ir password
+    Password'ą reikia saugoti hash'intu pavidalu (matomo password'o duomenyse nesaugoti, galima apsirašyti atskirame faile)
+    Du vartotojai su vienodu vardu negali būti priregistruoti
+    Atvaizduoti validacijos error'us
+    Atvaizduoti sėkmės žinutę ir nunaviguoti vartotoją į Profile puslapį
+
+Prisijungimas / Login (menu nesimato neprisijungusiam)
+    Vartotojas prisijungia su username ir password
+    Atvaizduoti nesėkmingo prisijungimo error'ą vartotojui
+    Atvaizduoti sėkmės žinutę ir nunaviguoti vartotoją į Profile puslapį
+    Vartotojui prisijungus atsiranda menu su Profile, AllUser ir Conversations nuorodomis
+    Galima naudoti JWT (bet nebūtina)
+
+Profilis / Profile
+    Prisijungęs vartotojas mato savo informaciją  - username ir photo
+    Prisijungęs vartotojas gali redaguoti savo informaciją:
+        Profilio nuotrauką
+        Slaptažodį (su pakartojimu)
+        Vartotojo vardą (vėl unikalus)
+
+Visi vartotojai / All users
+    Rodomi visi vartotojai
+    Vartotojo kortelė turi: username ir profileImage
+    Kai paspaudžiama ant kortelės yra nunaviguojama į specifinio vartotojo puslapį
+
+Specifinis vartotojas / Particular user profile
+    Rodoma informacija apie vartotoją - username ir photo
+    Mygtukas ant kurio paspaudus:
+        Sukuriamas naujas pokalbis su šiuo vartotoju ir nukeliama į to specifinio pokalbio chat'inimo puslapį
+        Jeigu pokalbis jau egzistuoja - nukeliama į to specifinio pokalbio chat'inimo puslapį
+
+Pokalbiai / Conversations (prie nuorodos turi būti rodoma kiek pokalbių prisijungęs vartotojas turi)
+    Matomi visi prisijungusio vartotojo pokalbiai
+    Prie pokalbio turi matytis ar yra neperskaitytų (naujų) žinučių
+    Galimybė ištrinti pokalbį (išsitrina abiem vartotojam)
+    Paspaudus ant vieno iš pokalbių vartotojas yra nukeliamas į to specifinio pokalbio  chat'inimo puslapį (chat page)
+
+Pokalbis / Chat Page
+    Siūsti žinutes tarp dviejų vartotojų
+    Prie išsiūstos žinutės rodomas siuntėjo vardas su nuotrauka ir žinutės išsiuntimo laikas
+    Like'inti žinutes (negalima like'inti savos)
+
+// Kiti reikalavimai
+    Git ir Github
+        Atlikti užduotis skirtingose šakose
+        Vykdyti commit'us su aiškiomis žinutėmis
+    Nupiešti ir prikabinti projekto wireframes
+    Duomenų bazės pasirinkimas laisvas (SQL arba noSQL)
+    Front su TypeScript'u; Back'ui TypeScript nebūtinas
+    Galima naudotis webSockets (bet nebūtina)
+    Stilizuoti pasirinktu būdu. Responsive design pasilikti pabaigai jei turit laiko
+    Laikyti tvarkingą komponentų/failų struktūrą
+    Aprašytas Readme.md failas, kuriame nurodyta kaip pasileisti projekta ir kam programa skirta bei kaip ja naudotis
+    Negalima naudoti komponentų bibliotekų kaip MUI, AntD, Booststrap ir t.t.
