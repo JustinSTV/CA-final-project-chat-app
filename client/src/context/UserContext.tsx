@@ -10,8 +10,11 @@ export type UserType = {
 };
 
 export type UserContextTypes = {
-  users: UserType[]
+  users: UserType[],
+  registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>
 };
+
+export type ErrorOrSuccessReturn = { error: string } | { success: string };
 
 type ReducerActionTypeVariations = 
 { type: 'getData', allData: UserType[] } |
@@ -32,10 +35,42 @@ const UserProvider = ({children}: ChildProps) => {
 
   const [users, dispatch] = useReducer(reducer, []);
 
+  const registerUser = async (user: Omit<UserType, "_id">): Promise<ErrorOrSuccessReturn> => {
+    try{
+      console.log("Registering user:", user);
+      const res = await fetch(`/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+      });
+      console.log(res);
+
+      if(res.status === 409){
+        const errorMsg = await res.json();
+        console.log("error:", errorMsg);
+        return errorMsg;
+      } else {
+        const data = await res.json();
+        console.log("user Created:", data);
+        dispatch({
+          type: 'add',
+          data: data
+        });
+        return { success: 'Registraciją Sėkmingą!' };
+      }
+    }catch(err){
+      console.error(err);
+      return { error: "Atsiprašome, registracijos metu įvyko serverio klaidą" };
+    }
+  }
+
   return(
     <UserContext.Provider
       value={{
-        users
+        users,
+        registerUser
       }}
     >
       {children}
