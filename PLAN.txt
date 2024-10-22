@@ -1,0 +1,25 @@
+Back-end:
+  Routes:
+    Users:
+      get: (/users) gauti visus users
+      get: (/users/:id) gauti specifini useri
+      get: (/users/login): prisijungimas su username ir password
+      post: (/users/register) sukurti tokį vartotoją (naudoti middleware, kad patikrinti ar tokio userio nera)
+      patch: (specific) redaguoti vartotojo info (pats vartotojas)
+    Messages:
+      post: (/messages) siusti žinutes iš vieno user, kitam user
+      get: (/conversations) gauti userio visas visas žinutes
+      delete: (/conversations/:id) ištinti pokalbį abiems useriams
+      get: (/conversations/:id/messages) gauti visas žinutes iš specifinio pokalbio 
+    Likes:
+      post: (/messages/:id/like) uždėti like and specifines žinutes
+
+Front-end:
+  pages:
+    RegisterPage.tsx
+    LoginPage.tsx
+    ProfilePage.tsx
+    AllUsersPage.tsx
+    SpecificUserProfilePage.tsx
+    ConversationsPage.tsx
+    ChatPage.tsx
