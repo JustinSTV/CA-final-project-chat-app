@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 
 import UserContext, {UserContextTypes} from "../../context/UserContext";
@@ -36,6 +36,7 @@ const RegisterPage = () => {
         setRegisterMessage(registerResponse.error)
       } else {
         setRegisterMessage(registerResponse.success);
+        navigate('/chat');
       }
     }
   });
@@ -115,6 +116,7 @@ const RegisterPage = () => {
           </p>
         ) : null
       }
+      <p>Have an account? <Link to='/login'>Login</Link></p>
     </StyledSection>
   );
 };

@@ -49,6 +49,7 @@ app.get('/users', async (req, res) => {
   }
 })
 
+//create new user
 const checkUniqueUser = async (req, res, next) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try{
@@ -72,10 +73,10 @@ const checkUniqueUser = async (req, res, next) => {
   }
 };
 
+//create new user if unique
 app.post("/users", checkUniqueUser, async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try{
-    // console.log("req body:", req.body);
     const { username, profileImage } = req.body;
 
     const defaultProfileImg = '/default-user-icon.jpg'
@@ -96,8 +97,38 @@ app.post("/users", checkUniqueUser, async (req, res) => {
     .collection('users')
     .findOne({ _id: result.insertedId });
     
-    console.log("data po inserto:", data);
     res.send(data);
+  }catch(err){
+    res.status(500).send(err);
+  } finally{
+    client.close();
+  }
+});
+
+//POST, returning user by username and password
+app.post("/users/login", async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try{
+    console.log("Ateinanti info iš fronto: ", req.body);
+
+    const data = await client
+      .db('chat_app')
+      .collection('users')
+      .findOne({username: req.body.username})
+    console.log("Data is DB: ", data);
+
+    if(data === null){ //? wrong username
+      res.status(401).send({ errorMessage: "User not Found!"});
+    } else{ //? user was found by username
+      const checkPassword = await bcrypt.compare(req.body.password, data.password);
+      console.log('password check', checkPassword)
+
+      if(!checkPassword){
+        res.status(401).send({errorMessage: "Wrong password!"});
+      } else{
+        res.send(data)
+      }
+    }
   }catch(err){
     res.status(500).send(err);
   } finally{

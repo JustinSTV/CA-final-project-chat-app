@@ -13,6 +13,7 @@ export type UserContextTypes = {
   users: UserType[],
   loggedInUser: UserType | null,
   registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>,
+  logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -29,6 +30,10 @@ const reducer = (state: UserType[], action: ReducerActionTypeVariations): UserTy
       return [...state, action.data]
   }
 } 
+
+/*
+READ THE PLAN. when user comes to this app he will only see login screen and register screen. in order to see MainPage with route /chat he needs to either login or register to this app. 
+*/
 
 const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
@@ -69,6 +74,34 @@ const UserProvider = ({children}: ChildProps) => {
     }
   };
 
+  const logInUser = async (userLoginInfo: Pick<UserType, 'username' | 'password'>): Promise<ErrorOrSuccessReturn> => {
+    try{
+      console.log('user login info', userLoginInfo)
+      const res = await fetch(`/api/users/login`, {
+        method: 'POST',
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify(userLoginInfo)
+      });
+      console.log("res front", res);
+
+      if(res.status === 401){
+        const error = await res.json();
+        return error;
+      } else {
+        const data = await res.json();
+        console.log("ok data:",data)
+        setLoggedInUser(data)
+        return { success: "Successfuly logged In!" }
+      }
+
+    }catch(err){
+      console.error(err)
+      return { error: 'Server Error! Something went wrong while logging in'}
+    }
+  }
+
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
@@ -85,7 +118,7 @@ const UserProvider = ({children}: ChildProps) => {
         users,
         loggedInUser,
         registerUser,
-        
+        logInUser
       }}
     >
       {children}
