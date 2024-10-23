@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import UserContext, {UserContextTypes} from "../../context/UserContext";
@@ -11,7 +11,7 @@ const StyledSection = styled.section`
 `;
 
 const RegisterPage = () => {
-
+  const navigate = useNavigate();
   const { registerUser } = useContext(UserContext) as UserContextTypes;
   const [registerMessage, setRegisterMessage] = useState('');
 
@@ -29,17 +29,27 @@ const RegisterPage = () => {
       console.log(values);
       const registerResponse = await registerUser({
         username: values.username,
-        profileImage: values.profileImage,
+        profileImage: values.profileImage || undefined,
         password: values.password
       });
       if("error" in registerResponse){
         setRegisterMessage(registerResponse.error)
       } else {
         setRegisterMessage(registerResponse.success);
-
       }
     }
-  })
+  });
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        formik.setFieldValue("profileImage", reader.result);  // Set base64 image
+      };
+      reader.readAsDataURL(file);  // Convert image to base64 string
+    }
+  };
 
   return (
     <StyledSection>
@@ -90,11 +100,10 @@ const RegisterPage = () => {
         <div>
           <label htmlFor="pfp">Profile Picture: </label>
           <input 
-            type="text"
+            type="file"
             id="pfp" name="pfp"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.profileImage}
+            accept="image/*"
+            onChange={handleImageUpload}
             />
         </div>
         <input type="submit" value='Register' />
