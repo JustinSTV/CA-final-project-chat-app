@@ -40,7 +40,7 @@ const UserContext = createContext<UserContextTypes | undefined>(undefined);
 const UserProvider = ({children}: ChildProps) => {
 
   const [users, dispatch] = useReducer(reducer, []);
-  const [loggedInUser, setLoggedInUser] = useState<null | UserType>(null)
+  const [loggedInUser, setLoggedInUser] = useState<null | UserType>(null);
 
   const registerUser = async (user: Omit<UserType, "_id">): Promise<ErrorOrSuccessReturn> => {
     try{
