@@ -21,7 +21,13 @@ const LoginPage = () => {
       password: ''
     },
     validationSchema: Yup.object({
-
+      username: Yup.string().required('Field is Required'),
+      password: Yup.string()
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d!@#$%^&*_+?]{5,20}$/,
+        "Password must containt at least: one lowercase, one uppercase, one number, one special symbol. Password length must be between 5 and 20 characters!"
+      )
+      .required("Password is required!")
     }),
     onSubmit: async(values) => {
       console.log(values);

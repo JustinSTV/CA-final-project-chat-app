@@ -13,23 +13,37 @@ const StyledSection = styled.section`
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { registerUser } = useContext(UserContext) as UserContextTypes;
-  const [registerMessage, setRegisterMessage] = useState('');
+  const [registerMessage, setRegisterMessage] = useState<string>('');
 
   const formik = useFormik({
     initialValues: {
       username: '',
       profileImage: '',
+      profileImageUrl: '',
       password: '',
       passwordRepeat: ''
     },
     validationSchema: Yup.object({
-
+      username: Yup.string()
+        .min(5, 'Username must be atleast 5 characters long!')
+        .max(20, "Username can't be 20 characters long!")
+        .required('Username is required'),
+      profileImageUrl: Yup.string().url('Invalid URL'),
+      password: Yup.string()
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&]{5,20}$/,
+          "Password must containt at least: one lowercase, one uppercase, one number, one special symbol. Password length must be between 5 and 20 characters!"
+        )
+        .required("Password is required!"),
+      passwordRepeat: Yup.string()
+      .oneOf([Yup.ref('password')], "Password doesn't match")
+      .required("Password Repeat is required")
     }),
     onSubmit: async (values) => {
       console.log(values);
       const registerResponse = await registerUser({
         username: values.username,
-        profileImage: values.profileImage || undefined,
+        profileImage: values.profileImage || values.profileImageUrl || undefined,
         password: values.password
       });
       if("error" in registerResponse){
@@ -46,9 +60,9 @@ const RegisterPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        formik.setFieldValue("profileImage", reader.result);  // Set base64 image
+        formik.setFieldValue("profileImage", reader.result);
       };
-      reader.readAsDataURL(file);  // Convert image to base64 string
+      reader.readAsDataURL(file);
     }
   };
 
@@ -106,6 +120,18 @@ const RegisterPage = () => {
             accept="image/*"
             onChange={handleImageUpload}
             />
+        </div>
+        <div>
+          <label htmlFor="profileImageUrl">Profile Picture URL: </label>
+          <input
+            type="url"
+            id="profileImageUrl"
+            name="profileImageUrl"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.profileImageUrl}
+          />
+          {formik.touched.profileImageUrl && formik.errors.profileImageUrl && <p>{formik.errors.profileImageUrl}</p>}
         </div>
         <input type="submit" value='Register' />
       </form>
