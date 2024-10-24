@@ -13,7 +13,8 @@ export type UserContextTypes = {
   users: UserType[],
   loggedInUser: UserType | null,
   registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>,
-  logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>
+  logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>,
+  logOut: () => void
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -94,6 +95,10 @@ const UserProvider = ({children}: ChildProps) => {
     }
   }
 
+  const logOut = () => {
+    setLoggedInUser(null);
+  }
+
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
@@ -110,7 +115,8 @@ const UserProvider = ({children}: ChildProps) => {
         users,
         loggedInUser,
         registerUser,
-        logInUser
+        logInUser,
+        logOut
       }}
     >
       {children}
