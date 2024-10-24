@@ -10,7 +10,7 @@ const MainOutlet = () => {
   return (
     <>
       <StyledMain>
-      <Header />
+        <Header />
         <Outlet />
       </StyledMain>
     </>

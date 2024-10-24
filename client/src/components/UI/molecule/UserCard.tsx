@@ -1,7 +1,6 @@
-import { useContext } from "react";
 import styled from "styled-components";
 
-import UserContext, {UserContextTypes, UserType} from "../../../context/UserContext";
+import { UserType} from "../../../context/UserContext";
 
 const StyledDiv = styled.div`
   background-color: #676765;

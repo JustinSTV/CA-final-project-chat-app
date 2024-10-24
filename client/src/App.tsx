@@ -6,6 +6,7 @@ import LoginPage from './components/pages/LoginPage';
 import MainOutlet from './components/templates/MainOutlet';
 import RegisterPage from './components/pages/RegisterPage';
 import MainPage from './components/pages/MainPage';
+import AllUsersPage from './components/pages/AllUsersPage';
 
 const App = () => {
 
@@ -17,6 +18,7 @@ const App = () => {
       <Route path='register' element={<RegisterPage />}/>
       <Route path="/" element={loggedInUser ? <MainOutlet /> : <Navigate to='/login' />}>
         <Route path='chat' element={<MainPage />}/>
+        <Route path='users' element={<AllUsersPage />}/>
       </Route>
       <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
