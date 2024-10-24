@@ -23,3 +23,13 @@ Front-end:
     SpecificUserProfilePage.tsx
     ConversationsPage.tsx
     ChatPage.tsx
+
+DB:
+  Users:
+    _id:string, username: string, profileImage: string, passwordHashed: string
+  Messages: 
+    _id:string, conversationId: string, senderId: string, recevierId: string, content: string, createdAt: date, likes:[_id from likes collection]
+  Conversations:
+    _id:string, participants: [user _id], createdAt: Date, updatedAt: date,lastMessage: {content:string, senderId:userId, createdAt: date}
+  Likes:
+    _id, messageId, userId, createdAt
