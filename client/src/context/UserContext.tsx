@@ -31,10 +31,6 @@ const reducer = (state: UserType[], action: ReducerActionTypeVariations): UserTy
   }
 } 
 
-/*
-READ THE PLAN. when user comes to this app he will only see login screen and register screen. in order to see MainPage with route /chat he needs to either login or register to this app. 
-*/
-
 const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
 const UserProvider = ({children}: ChildProps) => {
