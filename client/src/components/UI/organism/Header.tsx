@@ -86,7 +86,7 @@ const StyledHeader = styled.header`
 
 const Header = () => {
   const navigate = useNavigate();
-  const {users, loggedInUser} = useContext(UserContext) as UserContextTypes;
+  const {users, loggedInUser, logOut} = useContext(UserContext) as UserContextTypes;
 
   return (
     <StyledHeader>
@@ -109,7 +109,7 @@ const Header = () => {
       <div className="profileSection">
         <img src={loggedInUser?.profileImage} alt={loggedInUser?.username} />
         <p>{loggedInUser?.username}</p>
-        <button>Logout</button>
+        <button onClick={() => logOut()}>Logout</button>
       </div>
     </StyledHeader>
   );
