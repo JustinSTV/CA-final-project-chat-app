@@ -4,10 +4,11 @@ import styled from "styled-components";
 import UserContext, {UserContextTypes, UserType} from "../../../context/UserContext";
 
 const StyledDiv = styled.div`
-  border: white 1px solid;
+  background-color: #676765;
+  border-radius: 10px;
   color: white;
   height: 100px;
-  max-width: 400px;
+  width: 300px;
   padding: 0 20px;
   display: flex;
   align-items: center;
