@@ -12,3 +12,8 @@ html, body{
   background-color: #3C3C3B;
 }
 
+section{
+  min-width: calc(100vw - 30%);
+  height: 100vh;
+}
+

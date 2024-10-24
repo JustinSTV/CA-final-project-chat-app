@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import UserContext, {UserContextTypes} from "../../../context/UserContext";
 import UserCard from "../molecule/UserCard";
 
@@ -84,7 +85,7 @@ const StyledHeader = styled.header`
 `
 
 const Header = () => {
-
+  const navigate = useNavigate();
   const {users, loggedInUser} = useContext(UserContext) as UserContextTypes;
 
   return (
@@ -93,7 +94,7 @@ const Header = () => {
         <h1>You <span>Chat</span></h1>
       </div>
       <div className="allUsersBtn">
-        <button>All users</button>
+        <button onClick={() => navigate('/users')}>All users</button>
       </div>
       <div className="recentConvos">
         <h3>Recent converstaions</h3>
