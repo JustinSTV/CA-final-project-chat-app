@@ -40,7 +40,6 @@ const UserProvider = ({children}: ChildProps) => {
 
   const registerUser = async (user: Omit<UserType, "_id">): Promise<ErrorOrSuccessReturn> => {
     try{
-      console.log("Registering user:", user);
       const res = await fetch(`/api/users`, {
         method: "POST",
         headers: {
@@ -48,21 +47,18 @@ const UserProvider = ({children}: ChildProps) => {
         },
         body: JSON.stringify(user)
       });
-      console.log(res);
 
       if(res.status === 409){
         const errorMsg = await res.json();
-        console.log("error:", errorMsg);
         return errorMsg;
       } else {
         const data = await res.json();
-        console.log("user Created:", data);
         dispatch({
           type: 'add',
           data: data
         });
         setLoggedInUser(data)
-        return { success: 'Registraciją Sėkmingą!' };
+        return { success: 'Successfully regsitered!' };
       }
     }catch(err){
       console.error(err);

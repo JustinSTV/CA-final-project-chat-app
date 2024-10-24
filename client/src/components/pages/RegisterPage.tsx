@@ -7,13 +7,81 @@ import styled from "styled-components";
 import UserContext, {UserContextTypes} from "../../context/UserContext";
 
 const StyledSection = styled.section`
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 
+  >form{
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 50px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    >div{
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 5px 0;
+
+      >input{
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        width: 250px;
+      }
+      >input#pfp{
+        padding: 10px 0;
+      }
+      >::-webkit-file-upload-button{
+        background-color: #1446A3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+      }
+      >p.errorMsg{
+        color: red;
+        text-align: left;
+        max-width: 250px;
+        word-wrap: break-word;
+      }
+    }
+    >input[type="submit"]{
+      width: 80%;
+      cursor: pointer;
+      padding: 15px 30px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+      background-color: #1446A3;
+      font-size: 14px;
+      color: white;
+    }
+  }
+
+  >p.error-message{
+    color: red;
+    font-weight: bold;
+  }
+  >p.success-message{
+    color: green;
+    font-weight: bold;
+  }
 `;
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { registerUser } = useContext(UserContext) as UserContextTypes;
-  const [registerMessage, setRegisterMessage] = useState<string>('');
+  const [registerMessage, setRegisterMessage] = useState("");
+  // console.log(registerMessage)
 
   const formik = useFormik({
     initialValues: {
@@ -47,10 +115,12 @@ const RegisterPage = () => {
         password: values.password
       });
       if("error" in registerResponse){
-        setRegisterMessage(registerResponse.error)
+        setRegisterMessage(registerResponse.error);
       } else {
         setRegisterMessage(registerResponse.success);
-        navigate('/chat');
+        setTimeout(() => {
+          navigate('/chat');
+        }, 2000);
       }
     }
   });
@@ -81,7 +151,7 @@ const RegisterPage = () => {
             />
             {
               formik.touched.username && formik.errors.username
-              && <p>{formik.errors.username}</p>
+              && <p className="errorMsg">{formik.errors.username}</p>
             }
         </div>
         <div>
@@ -95,7 +165,7 @@ const RegisterPage = () => {
             />
             {
               formik.touched.password && formik.errors.password
-              && <p>{formik.errors.password}</p>
+              && <p className="errorMsg">{formik.errors.password}</p>
             }
         </div>
         <div>
@@ -109,7 +179,7 @@ const RegisterPage = () => {
             />
             {
               formik.touched.passwordRepeat && formik.errors.passwordRepeat
-              && <p>{formik.errors.passwordRepeat}</p>
+              && <p className="errorMsg">{formik.errors.passwordRepeat}</p>
             }
         </div>
         <div>
@@ -131,13 +201,16 @@ const RegisterPage = () => {
             onBlur={formik.handleBlur}
             value={formik.values.profileImageUrl}
           />
-          {formik.touched.profileImageUrl && formik.errors.profileImageUrl && <p>{formik.errors.profileImageUrl}</p>}
+          {
+            formik.touched.profileImageUrl && formik.errors.profileImageUrl 
+            && <p className="errorMsg">{formik.errors.profileImageUrl}</p>
+          }
         </div>
         <input type="submit" value='Register' />
       </form>
       {
         registerMessage ? (
-          <p className={registerMessage.includes('Sėkmingą') ? 'success-message' : 'error-message'}>
+          <p className={registerMessage.includes('Successfully') ? 'success-message' : 'error-message'}>
             {registerMessage}
           </p>
         ) : null

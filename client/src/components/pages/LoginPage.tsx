@@ -7,7 +7,65 @@ import { Link, useNavigate } from "react-router-dom";
 import UserContext, {UserContextTypes} from "../../context/UserContext";
 
 const StyledSection = styled.section`
-  
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  >form{
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 50px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    
+    >div{
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 5px 0;
+
+      >input{
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        width: 250px;
+      }
+      >p.errorMsg{
+        color: red;
+        text-align: left;
+        max-width: 250px;
+        word-wrap: break-word;
+      }
+    }
+    >input[type="submit"]{
+      width: 80%;
+      cursor: pointer;
+      padding: 15px 30px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+      background-color: #1446A3;
+      font-size: 14px;
+      color: white;
+    }
+  }
+
+  >p.error-message{
+    color: red;
+    font-weight: bold;
+  }
+  >p.success-message{
+    color: green;
+    font-weight: bold;
+  }
 `;
 
 const LoginPage = () => {
@@ -37,7 +95,9 @@ const LoginPage = () => {
           setLoggingMessage(loginResponse.error);
         } else{
           setLoggingMessage(loginResponse.success)
-          navigate('/chat')
+          setTimeout(() => {
+            navigate('/chat');
+          }, 2000);
         }
       } catch(err){
         console.error(err)
@@ -50,7 +110,7 @@ const LoginPage = () => {
       <h2>Login</h2>
       <form onSubmit={formik.handleSubmit}>
         <div>
-          <label htmlFor="username">username:</label>
+          <label htmlFor="username">Username:</label>
           <input 
             type="text"
             id="username" name="username"
@@ -64,7 +124,7 @@ const LoginPage = () => {
           }
         </div>
         <div>
-          <label htmlFor="password">password:</label>
+          <label htmlFor="password">Password:</label>
           <input 
             type="password"
             id="password" name="password"
@@ -77,7 +137,7 @@ const LoginPage = () => {
             && <p className="errorMsg">{formik.errors.password}</p>
           }
         </div>
-        <input type="submit" value='Prisijungti'/>
+        <input type="submit" value='Login'/>
       </form>
       {
         loginMessage ? (

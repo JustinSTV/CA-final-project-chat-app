@@ -61,7 +61,7 @@ const checkUniqueUser = async (req, res, next) => {
       console.log("checking:", sameUsername);
 
       if(sameUsername){
-        res.status(409).send({errorMessage: "Username already exists!"});
+        res.status(409).send({error: "Username already exists!"});
       } else{
         next();
       }
@@ -118,13 +118,13 @@ app.post("/users/login", async (req, res) => {
     console.log("Data is DB: ", data);
 
     if(data === null){ //? wrong username
-      res.status(401).send({ errorMessage: "User not Found!"});
+      res.status(401).send({ error: "User not Found!"});
     } else{ //? user was found by username
       const checkPassword = await bcrypt.compare(req.body.password, data.password);
       console.log('password check', checkPassword)
 
       if(!checkPassword){
-        res.status(401).send({errorMessage: "Wrong password!"});
+        res.status(401).send({error: "Wrong password!"});
       } else{
         res.send(data)
       }
