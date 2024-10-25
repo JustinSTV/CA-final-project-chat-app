@@ -101,6 +101,9 @@ const UserProfile = () => {
       newUsername: yup.string()
         .min(5, 'Username must be at least 5 characters long!')
         .max(20, "Username can't be longer than 20 characters!")
+        .test('is-different', 'Cannot change to the same username!', (value) => {
+          return value !== loggedInUser?.username;
+        })
     }),
     onSubmit: async (values) => {
       if(loggedInUser){

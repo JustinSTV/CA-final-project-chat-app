@@ -138,7 +138,14 @@ app.patch('/users/:id/username', async (req, res) => {
     const id = req.params.id;
     const newUsername = req.body.username;
 
-    
+    const user = await client
+    .db('chat_app')
+    .collection('users')
+    .findOne({ _id: id });
+
+    if (user.username === newUsername) {
+      return res.status(409).send({ error: "Cannot change to the same username" });
+    }
 
     const patchResponse = await client
     .db('chat_app')
