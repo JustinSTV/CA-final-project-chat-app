@@ -58,8 +58,6 @@ const checkUniqueUser = async (req, res, next) => {
       .collection('users')
       .findOne({username: req.body.username});
 
-      console.log("checking:", sameUsername);
-
       if(sameUsername){
         res.status(409).send({error: "Username already exists!"});
       } else{
@@ -109,19 +107,16 @@ app.post("/users", checkUniqueUser, async (req, res) => {
 app.post("/users/login", async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try{
-    console.log("Ateinanti info iš fronto: ", req.body);
 
     const data = await client
       .db('chat_app')
       .collection('users')
       .findOne({username: req.body.username})
-    console.log("Data is DB: ", data);
 
     if(data === null){ //? wrong username
       res.status(401).send({ error: "User not Found!"});
     } else{ //? user was found by username
       const checkPassword = await bcrypt.compare(req.body.password, data.password);
-      console.log('password check', checkPassword)
 
       if(!checkPassword){
         res.status(401).send({error: "Wrong password!"});
@@ -130,6 +125,32 @@ app.post("/users/login", async (req, res) => {
       }
     }
   }catch(err){
+    res.status(500).send(err);
+  } finally{
+    client.close();
+  }
+})
+
+// PATCH, edit users username
+app.patch('/users/:id/username', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try{
+    const id = req.params.id;
+    const newUsername = req.body.username;
+
+    
+
+    const patchResponse = await client
+    .db('chat_app')
+    .collection('users')
+    .findOneAndUpdate(
+      { _id: id },
+      { $set: { username: newUsername } },
+      { returnDocument: 'after' }
+    )
+    console.log('patch: ', patchResponse)
+    res.send(patchResponse);
+  } catch(err){
     res.status(500).send(err);
   } finally{
     client.close();

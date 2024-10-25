@@ -14,7 +14,8 @@ export type UserContextTypes = {
   loggedInUser: UserType | null,
   registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>,
   logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>,
-  logOut: () => void
+  logOut: () => void,
+  changeUsername: (userId: string, newUsername: string) => Promise<ErrorOrSuccessReturn>
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -99,6 +100,29 @@ const UserProvider = ({children}: ChildProps) => {
     setLoggedInUser(null);
   }
 
+  const changeUsername = async (userId: string, newUsername: string): Promise<ErrorOrSuccessReturn> => {
+    try{
+      const res = await fetch(`/api/users/${userId}/username`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username: newUsername })
+      });
+      if(res.status === 409){
+        const errorMsg = await res.json();
+        return errorMsg;
+      } else {
+        const data = await res.json();
+        setLoggedInUser(data);
+        return { success: 'Username successfully changed!' };
+      }
+    } catch(err){
+      console.error(err);
+      return { error: "Server error occurred while changing username" };
+    }
+  }
+
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
@@ -116,7 +140,8 @@ const UserProvider = ({children}: ChildProps) => {
         loggedInUser,
         registerUser,
         logInUser,
-        logOut
+        logOut,
+        changeUsername
       }}
     >
       {children}
