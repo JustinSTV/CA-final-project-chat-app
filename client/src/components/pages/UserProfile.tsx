@@ -83,15 +83,23 @@ const StyledSection = styled.section`
           font-weight: bold;
         }
       }
+      >p.error-message{
+        color: red;
+        font-weight: bold;
+      }
+      >p.success-message{
+        color: lime;
+        font-weight: bold;
+      }
     }
   }
 `
 
 const UserProfile = () => {
 
-  const {loggedInUser, changeUsername} = useContext(UserContext) as UserContextTypes;
+  const {loggedInUser, changeUsername, changePassword} = useContext(UserContext) as UserContextTypes;
   const [usernameChangeMsg, setUsernameChangeMsg] = useState<string>('');
-  // console.log(loggedInUser);
+  const [passwordChangeMsg, setPasswordChangeMsg] = useState<string>('');
 
   const usernameFormik = useFormik({
     initialValues: {
@@ -115,6 +123,43 @@ const UserProfile = () => {
           }, 2000)
         }
       }
+      usernameFormik.resetForm();
+    }
+  });
+
+  const passwordFormik = useFormik({
+    initialValues: {
+      oldPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
+    },
+    validationSchema: yup.object({
+      oldPassword: yup.string().required("Old Password is required"),
+      newPassword: yup.string().required('New password is required')
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&]{5,20}$/,
+        "Password must containt at least: one lowercase, one uppercase, one number, one special symbol. Password length must be between 5 and 20 characters!"
+      ),
+      confirmNewPassword: yup.string()
+        .oneOf([yup.ref('newPassword'), undefined], 'Passwords must match')
+        .required('Confirm new password is required')
+    }),
+    onSubmit: async (values) => {
+      if(loggedInUser){
+        const results = await changePassword(loggedInUser._id, values.oldPassword, values.newPassword);
+        if('success' in results){
+          setPasswordChangeMsg(results.success)
+          setTimeout(() => {
+            setPasswordChangeMsg('')
+          }, 3000)
+        } else if('error' in results){
+          setPasswordChangeMsg(results.error);
+          setTimeout(() => {
+            setPasswordChangeMsg('')
+          }, 3000)
+        }
+      }
+      passwordFormik.resetForm();
     }
   });
 
@@ -148,27 +193,53 @@ const UserProfile = () => {
         </div>
         <div className="password">
           <h3>Change Password</h3>
-          <form action="">
+          <form onSubmit={passwordFormik.handleSubmit}>
             <div>
               <input 
-                type="password" 
+                type="password"
+                id="oldPassword" name="oldPassword"
                 placeholder="Old Password"
+                onChange={passwordFormik.handleChange}
+                onBlur={passwordFormik.handleBlur}
+                value={passwordFormik.values.oldPassword}
               />
+              {passwordFormik.touched.oldPassword && passwordFormik.errors.oldPassword ? (
+                <p className="errorMsg">{passwordFormik.errors.oldPassword}</p>
+              ) : null}
             </div>
             <div>
               <input 
                 type="password"
+                id="newPassword" name="newPassword"
                 placeholder="New Password"
+                onChange={passwordFormik.handleChange}
+                onBlur={passwordFormik.handleBlur}
+                value={passwordFormik.values.newPassword}
               />
+              {passwordFormik.touched.newPassword && passwordFormik.errors.newPassword ? (
+                <p className="errorMsg">{passwordFormik.errors.newPassword}</p>
+              ) : null}
             </div>
             <div>
               <input 
                 type="password"
+                id="confirmNewPassword" name="confirmNewPassword"
                 placeholder="Repeat New Password"
+                onChange={passwordFormik.handleChange}
+                onBlur={passwordFormik.handleBlur}
+                value={passwordFormik.values.confirmNewPassword}
               />
+              {passwordFormik.touched.confirmNewPassword && passwordFormik.errors.confirmNewPassword ? (
+                <p className="errorMsg">{passwordFormik.errors.confirmNewPassword}</p>
+              ) : null}
             </div>
             <input type="submit" value="Change password" />
           </form>
+          {passwordChangeMsg && (
+            <p className={passwordChangeMsg.includes('successfully') ? 'success-message' : 'error-message'}>
+              {passwordChangeMsg}
+            </p>
+          )}
         </div>
       </div>
     </StyledSection>

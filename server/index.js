@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { MongoClient } from "mongodb";
+import { Collection, MongoClient } from "mongodb";
 import cors from "cors";
 import { v4 as generateID } from "uuid";
 import bcrypt from "bcrypt";
@@ -155,7 +155,42 @@ app.patch('/users/:id/username', async (req, res) => {
       { $set: { username: newUsername } },
       { returnDocument: 'after' }
     )
-    console.log('patch: ', patchResponse)
+    res.send(patchResponse);
+  } catch(err){
+    res.status(500).send(err);
+  } finally{
+    client.close();
+  }
+})
+
+//PATCH, edit users password
+app.patch('/users/:id/password', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try{
+    const id = req.params.id;
+    const {oldPassword, newPassword} = req.body;
+
+
+    const user = await client
+      .db('chat_app')
+      .collection('users')
+      .findOne({_id: id});
+
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).send({ error: "Old password is incorrect" });
+    }
+
+    const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+    
+    const patchResponse = await client
+    .db('chat_app')
+    .collection('users')
+    .updateOne(
+      { _id: id },
+      { $set: { password: hashedNewPassword } }
+    );
+
     res.send(patchResponse);
   } catch(err){
     res.status(500).send(err);

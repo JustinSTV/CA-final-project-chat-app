@@ -88,7 +88,6 @@ const LoginPage = () => {
       .required("Password is required!")
     }),
     onSubmit: async(values) => {
-      console.log(values);
       try{
         const loginResponse = await logInUser(values);
         if("error" in loginResponse){

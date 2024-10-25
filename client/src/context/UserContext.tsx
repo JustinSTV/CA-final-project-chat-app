@@ -15,7 +15,8 @@ export type UserContextTypes = {
   registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>,
   logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>,
   logOut: () => void,
-  changeUsername: (userId: string, newUsername: string) => Promise<ErrorOrSuccessReturn>
+  changeUsername: (userId: string, newUsername: string) => Promise<ErrorOrSuccessReturn>,
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<ErrorOrSuccessReturn>
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -70,7 +71,6 @@ const UserProvider = ({children}: ChildProps) => {
 
   const logInUser = async (userLoginInfo: Pick<UserType, 'username' | 'password'>): Promise<ErrorOrSuccessReturn> => {
     try{
-      console.log('user login info', userLoginInfo)
       const res = await fetch(`/api/users/login`, {
         method: 'POST',
         headers: {
@@ -78,14 +78,12 @@ const UserProvider = ({children}: ChildProps) => {
         },
         body: JSON.stringify(userLoginInfo)
       });
-      console.log("res front", res);
 
       if(res.status === 401){
         const error = await res.json();
         return error;
       } else {
         const data = await res.json();
-        console.log("ok data:",data)
         setLoggedInUser(data)
         return { success: "Successfuly logged In!" }
       }
@@ -121,7 +119,29 @@ const UserProvider = ({children}: ChildProps) => {
       console.error(err);
       return { error: "Server error occurred while changing username" };
     }
-  }
+  };
+
+  const changePassword = async (userId: string, oldPassword: string, newPassword: string): Promise<ErrorOrSuccessReturn> => {
+    try{
+      const res = await fetch(`/api/users/${userId}/password`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+      if(res.status === 401){
+        const errorMsg = await res.json();
+        console.log(errorMsg)
+        return errorMsg;
+      } else {
+        return { success: 'Password successfully changed!' };
+      }
+    } catch(err){
+      console.error(err);
+      return { error: "Server error occurred while changing password" };
+    }
+  };
 
   useEffect(() => {
     fetch('/api/users')
@@ -141,7 +161,8 @@ const UserProvider = ({children}: ChildProps) => {
         registerUser,
         logInUser,
         logOut,
-        changeUsername
+        changeUsername,
+        changePassword
       }}
     >
       {children}
