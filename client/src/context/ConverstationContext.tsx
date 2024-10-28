@@ -21,6 +21,7 @@ type ConversationWithUserType = ConverstationType & {
 
 export type ConversationContextTypes = {
   conversations: ConversationWithUserType[],
+  startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConverstationType>
 };
 
 type ReducerActionTypeVariations =
@@ -41,7 +42,32 @@ const ConverstationContext = createContext<undefined | ConversationContextTypes>
 const ConverstationProvider = ({children}: ChildProps) => {
 
   const [conversations, dispatch] = useReducer(reducer, []);
-  console.log(conversations)
+  console.log(conversations);
+
+  const startConversation = async (loggedInUserId: string, otherUserId: string): Promise<ConverstationType> => {
+    try {
+      const res = await fetch(`/api/conversations`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          loggedInUserId,
+          otherUserId
+        })
+      });
+  
+      const data = await res.json();
+      dispatch({
+        type: 'startConversation',
+        newConversation: data
+      });
+      return data;
+    } catch (err) {
+      console.error("Error starting chat:", err);
+      throw err;
+    }
+  };
 
   useEffect(() => {
     fetch('/api/conversations')
@@ -58,7 +84,8 @@ const ConverstationProvider = ({children}: ChildProps) => {
   return(
     <ConverstationContext.Provider
       value={{
-        conversations
+        conversations,
+        startConversation
       }}
     >
       {children}
