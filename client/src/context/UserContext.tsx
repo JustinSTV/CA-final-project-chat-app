@@ -16,7 +16,8 @@ export type UserContextTypes = {
   logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>,
   logOut: () => void,
   changeUsername: (userId: string, newUsername: string) => Promise<ErrorOrSuccessReturn>,
-  changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<ErrorOrSuccessReturn>
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<ErrorOrSuccessReturn>,
+  changeProfilePicture: (userId: string, profileImage: string) => Promise<ErrorOrSuccessReturn>
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -92,7 +93,7 @@ const UserProvider = ({children}: ChildProps) => {
       console.error(err)
       return { error: 'Server Error! Something went wrong while logging in'}
     }
-  }
+  };
 
   const logOut = () => {
     setLoggedInUser(null);
@@ -143,6 +144,29 @@ const UserProvider = ({children}: ChildProps) => {
     }
   };
 
+  const changeProfilePicture = async (userId: string, profileImage: string): Promise<ErrorOrSuccessReturn> => {
+    try {
+      const res = await fetch(`/api/users/${userId}/profileImage`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ profileImage })
+      });
+      if (res.status === 200) {
+        const data = await res.json();
+        setLoggedInUser(data);
+        return { success: 'Profile picture successfully changed!' };
+      } else {
+        const errorMsg = await res.json();
+        return errorMsg;
+      }
+    } catch (err) {
+      console.error(err);
+      return { error: "Server error occurred while changing profile picture" };
+    }
+  };
+
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
@@ -162,7 +186,8 @@ const UserProvider = ({children}: ChildProps) => {
         logInUser,
         logOut,
         changeUsername,
-        changePassword
+        changePassword,
+        changeProfilePicture
       }}
     >
       {children}

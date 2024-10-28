@@ -197,4 +197,26 @@ app.patch('/users/:id/password', async (req, res) => {
   } finally{
     client.close();
   }
-})
+});
+
+app.patch('/users/:id/profileImage', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const id = req.params.id;
+    const { profileImage } = req.body;
+
+    const patchResponse = await client
+      .db('chat_app')
+      .collection('users')
+      .findOneAndUpdate(
+        { _id: id },
+        { $set: { profileImage } },
+        { returnDocument: 'after' }
+      );
+    res.send(patchResponse);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});

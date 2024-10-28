@@ -19,7 +19,7 @@ const StyledSection = styled.section`
   >div.profilePic{
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 30px;
 
     >img{
       height: 200px;
@@ -27,15 +27,28 @@ const StyledSection = styled.section`
       border-radius: 50%;
       object-fit: cover;
     }
-    >button{
-      cursor: pointer;
-      padding: 15px 40px;
-      border-radius: 5px;
-      border: none;
-      background-color: #1446A3;
-      font-size: 14px;
-      font-weight: bold;
-      color: white;
+    >div.pfpInput{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      >::-webkit-file-upload-button{
+        cursor: pointer;
+        padding: 15px 40px;
+        border-radius: 5px;
+        border: none;
+        background-color: #1446A3;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+      }
+      >p.error-message{
+        color: red;
+        font-weight: bold;
+      }
+      >p.success-message{
+        color: lime;
+        font-weight: bold;
+      }
     }
   }
 
@@ -97,9 +110,30 @@ const StyledSection = styled.section`
 
 const UserProfile = () => {
 
-  const {loggedInUser, changeUsername, changePassword} = useContext(UserContext) as UserContextTypes;
+  const {loggedInUser, changeUsername, changePassword, changeProfilePicture} = useContext(UserContext) as UserContextTypes;
   const [usernameChangeMsg, setUsernameChangeMsg] = useState<string>('');
   const [passwordChangeMsg, setPasswordChangeMsg] = useState<string>('');
+  const [pfpChangeMsg, setPfpChangeMsg] = useState<string>('');
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && loggedInUser) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        const result = await changeProfilePicture(loggedInUser._id, base64Image);
+        if ('success' in result) {
+          setPfpChangeMsg(result.success);
+        } else {
+          setPfpChangeMsg(result.error);
+        }
+        setTimeout(() => {
+          setPfpChangeMsg('');
+        }, 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const usernameFormik = useFormik({
     initialValues: {
@@ -168,7 +202,15 @@ const UserProfile = () => {
       <h2>Settings</h2>
       <div className="profilePic">
         <img src={loggedInUser?.profileImage} alt={loggedInUser?.username} />
-        <button>Change Profile Picture</button>
+        <div className="pfpInput">
+          <label htmlFor="profileImageUpload">Change Profile Picture</label>
+          <input id="profileImageUpload" type="file" accept="image/*" onChange={handleImageUpload} />
+          {pfpChangeMsg && (
+            <p className={pfpChangeMsg.includes('successfully') ? 'success-message' : 'error-message'}>
+              {pfpChangeMsg}
+            </p>
+          )}
+        </div>
       </div>
       <div className="usernameAndPassword">
         <div className="username">
