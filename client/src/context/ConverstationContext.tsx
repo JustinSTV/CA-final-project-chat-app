@@ -15,16 +15,19 @@ export type ConverstationType = {
   }
 }
 
+type ConversationWithUserType = ConverstationType & {
+  userData: UserType[]
+}
+
 export type ConversationContextTypes = {
-  conversations: ConverstationType[],
-  startConversation: (participants: string[]) => Promise<ConverstationType>
+  conversations: ConversationWithUserType[],
 };
 
 type ReducerActionTypeVariations =
-{ type: 'setConversation', data: ConverstationType[] } |
-{ type: 'startConversation', newConversation: ConverstationType }
+{ type: 'setConversation', data: ConversationWithUserType[] } |
+{ type: 'startConversation', newConversation: ConversationWithUserType }
 
-const reducer = (state: ConverstationType[], action: ReducerActionTypeVariations): ConverstationType[]  => {
+const reducer = (state: ConversationWithUserType[], action: ReducerActionTypeVariations): ConversationWithUserType[]  => {
   switch(action.type){
     case 'setConversation':
       return action.data;
@@ -38,25 +41,24 @@ const ConverstationContext = createContext<undefined | ConversationContextTypes>
 const ConverstationProvider = ({children}: ChildProps) => {
 
   const [conversations, dispatch] = useReducer(reducer, []);
+  console.log(conversations)
 
-  const startConversation = async (participants: string[]): Promise<ConverstationType> => {
-    const response = await fetch('/api/conversations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ participants })
-    });
-    const newConversation = await response.json();
-    dispatch({ type: 'startConversation', newConversation });
-    return newConversation;
-  };
+  useEffect(() => {
+    fetch('/api/conversations')
+    .then(res => res.json())
+    .then(data => {
+      console.log("user convos:",data)
+      dispatch({
+        type: 'setConversation',
+        data: data
+      })
+    })
+  },[])
 
   return(
     <ConverstationContext.Provider
       value={{
-        conversations,
-        startConversation
+        conversations
       }}
     >
       {children}

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import UserContext, { UserContextTypes } from "../../context/UserContext";
-import ConverstationContext, { ConversationContextTypes } from "../../context/ConverstationContext";
+
 import styled from "styled-components";
 
 const StyledSection = styled.section`
@@ -34,7 +34,6 @@ const SpecificUserProfile = () => {
 
   const { username } = useParams<{ username: string }>();
   const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
-  const { startConversation } = useContext(ConverstationContext) as ConversationContextTypes;
   const navigate = useNavigate();
   const user = users.find((user) => user.username === username);
 
@@ -43,10 +42,8 @@ const SpecificUserProfile = () => {
   }
 
   const handleStartChat = async () => {
-    if (loggedInUser) {
-      const newConversation = await startConversation([loggedInUser._id, user._id]);
-      navigate(`/chat/${newConversation._id}`);
-    }
+    console.log("Starting chat with user:", user.username);
+    console.log("logged in user: ", loggedInUser?.username);
   };
 
   return (
