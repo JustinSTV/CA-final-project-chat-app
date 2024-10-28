@@ -95,7 +95,7 @@ const LoginPage = () => {
         } else{
           setLoggingMessage(loginResponse.success)
           setTimeout(() => {
-            navigate('/profile/:username');
+            navigate(`/profile/${values.username}`);
           }, 2000);
         }
       } catch(err){
