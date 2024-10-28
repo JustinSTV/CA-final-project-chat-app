@@ -1,6 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import UserContext, { UserContextTypes } from "../../context/UserContext";
+import ConverstationContext, { ConversationContextTypes } from "../../context/ConverstationContext";
 import styled from "styled-components";
 
 const StyledSection = styled.section`
@@ -32,18 +33,27 @@ const StyledSection = styled.section`
 const SpecificUserProfile = () => {
 
   const { username } = useParams<{ username: string }>();
-  const { users } = useContext(UserContext) as UserContextTypes;
+  const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
+  const { startConversation } = useContext(ConverstationContext) as ConversationContextTypes;
+  const navigate = useNavigate();
   const user = users.find((user) => user.username === username);
 
   if (!user) {
     return <p>User not found</p>;
   }
 
+  const handleStartChat = async () => {
+    if (loggedInUser) {
+      const newConversation = await startConversation([loggedInUser._id, user._id]);
+      navigate(`/chat/${newConversation._id}`);
+    }
+  };
+
   return (
     <StyledSection>
       <img src={user.profileImage} alt={`${user.username}`} />
       <h2>{user.username}</h2>
-      <button>Start Chat</button>
+      <button onClick={handleStartChat}>Start Chat</button>
     </StyledSection>
   );
 }

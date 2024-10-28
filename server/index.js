@@ -199,6 +199,7 @@ app.patch('/users/:id/password', async (req, res) => {
   }
 });
 
+//PATCH, edit user profile picture
 app.patch('/users/:id/profileImage', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
@@ -214,6 +215,100 @@ app.patch('/users/:id/profileImage', async (req, res) => {
         { returnDocument: 'after' }
       );
     res.send(patchResponse);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+//GET, get user conversations
+app.get('/conversations', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const userId = req.query.userId;
+    const data = await client
+      .db('chat_app')
+      .collection('conversations')
+      .find({ participants: userId })
+      .toArray();
+    res.send(data);
+  } catch (err) {
+    res.status(500).send({ error: err });
+  } finally {
+    client.close();
+  }
+});
+
+//POST, Create new conversations
+app.post('/conversations', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const { participants } = req.body;
+    const newConversation = {
+      _id: generateID(),
+      participants,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastMessage: null
+    };
+    const result = await client
+      .db('chat_app')
+      .collection('conversations')
+      .insertOne(newConversation);
+    res.send(result);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+
+app.get('/conversations/:id/messages', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const conversationId = req.params.id;
+    const data = await client
+      .db('chat_app')
+      .collection('messages')
+      .find({ conversationId })
+      .toArray();
+    res.send(data);
+  } catch (err) {
+    res.status(500).send({ error: err });
+  } finally {
+    client.close();
+  }
+});
+
+app.post('/messages', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const { conversationId, senderId, content } = req.body;
+    const newMessage = {
+      _id: generateID(),
+      conversationId,
+      senderId,
+      content,
+      createdAt: new Date(),
+      likes: []
+    };
+    const result = await client
+      .db('chat_app')
+      .collection('messages')
+      .insertOne(newMessage);
+
+    // Update the last message in the conversation
+    await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId },
+        { $set: { lastMessage: { content, senderId, createdAt: new Date() }, updatedAt: new Date() } }
+      );
+
+    res.send(result.ops[0]);
   } catch (err) {
     res.status(500).send(err);
   } finally {
