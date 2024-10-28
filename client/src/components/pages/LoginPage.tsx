@@ -95,7 +95,7 @@ const LoginPage = () => {
         } else{
           setLoggingMessage(loginResponse.success)
           setTimeout(() => {
-            navigate('/chat');
+            navigate('/profile/:username');
           }, 2000);
         }
       } catch(err){

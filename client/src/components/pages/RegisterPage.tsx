@@ -117,7 +117,7 @@ const RegisterPage = () => {
       } else {
         setRegisterMessage(registerResponse.success);
         setTimeout(() => {
-          navigate('/chat');
+          navigate('/profile/:username');
         }, 2000);
       }
     }
