@@ -117,7 +117,7 @@ const RegisterPage = () => {
       } else {
         setRegisterMessage(registerResponse.success);
         setTimeout(() => {
-          navigate('/profile/:username');
+          navigate(`/profile/${values.username}`);
         }, 2000);
       }
     }
