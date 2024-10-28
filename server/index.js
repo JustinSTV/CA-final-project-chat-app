@@ -244,7 +244,6 @@ app.get('/conversations/:userId', async (req, res) => {
     client.close();
   }
 });
-//GET by id, get converstations by id
 
 //POST, Create new conversations or return existing one
 app.post('/conversations', async (req, res) => {
@@ -288,6 +287,25 @@ app.post('/conversations', async (req, res) => {
       
       res.send(data);
     }
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+// GET, get messages for that conversation
+app.get('/conversations/:id/messages', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    //? pasiemam convo id
+    const conversationId = req.params.id;
+    const messages = await client
+      .db('chat_app')
+      .collection('messages')
+      .find({ conversationId })
+      .toArray();
+    res.send(messages);
   } catch (err) {
     res.status(500).send(err);
   } finally {
