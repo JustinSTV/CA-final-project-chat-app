@@ -1,4 +1,4 @@
-import { createContext, useReducer, ReactElement, useEffect } from "react";
+import { createContext, useReducer, ReactElement} from "react";
 import { UserType } from "./UserContext";
 
 type ChildProps = { children: ReactElement };
@@ -68,18 +68,6 @@ const ConverstationProvider = ({children}: ChildProps) => {
       throw err;
     }
   };
-
-  useEffect(() => {
-    fetch('/api/conversations')
-    .then(res => res.json())
-    .then(data => {
-      console.log("user convos:",data)
-      dispatch({
-        type: 'setConversation',
-        data: data
-      })
-    })
-  },[])
 
   return(
     <ConverstationContext.Provider
