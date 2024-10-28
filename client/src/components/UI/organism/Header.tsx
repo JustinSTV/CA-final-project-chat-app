@@ -60,16 +60,22 @@ const StyledHeader = styled.header`
   }
 
   >div.profileSection{
+    border-top: 3px solid #3C3C3B;
     height: 10%;
     display: flex;
     align-items: center;
-    gap: 20px;
     padding: 0 20px;
-    >img{
-      object-fit: cover;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
+    >div{
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      >img{
+        object-fit: cover;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+      }
     }
     >button{
       margin-left: auto;
@@ -107,8 +113,14 @@ const Header = () => {
         </div>
       </div>
       <div className="profileSection">
-        <img src={loggedInUser?.profileImage} alt={loggedInUser?.username} />
-        <p>{loggedInUser?.username}</p>
+        {
+          loggedInUser && (
+            <div onClick={() => navigate(`/profile/${loggedInUser.username}`)}>
+              <img src={loggedInUser.profileImage} alt={loggedInUser.username} />
+              <p>{loggedInUser.username}</p>
+            </div>
+          )
+        }
         <button onClick={() => logOut()}>Logout</button>
       </div>
     </StyledHeader>

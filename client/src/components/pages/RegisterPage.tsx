@@ -81,7 +81,6 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { registerUser } = useContext(UserContext) as UserContextTypes;
   const [registerMessage, setRegisterMessage] = useState("");
-  // console.log(registerMessage)
 
   const formik = useFormik({
     initialValues: {
@@ -108,7 +107,6 @@ const RegisterPage = () => {
       .required("Password Repeat is required")
     }),
     onSubmit: async (values) => {
-      console.log(values);
       const registerResponse = await registerUser({
         username: values.username,
         profileImage: values.profileImage || values.profileImageUrl || undefined,

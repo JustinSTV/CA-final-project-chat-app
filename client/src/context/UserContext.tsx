@@ -14,7 +14,10 @@ export type UserContextTypes = {
   loggedInUser: UserType | null,
   registerUser: (user: Omit<UserType, "_id">) => Promise<ErrorOrSuccessReturn>,
   logInUser: (userLoginInfo: Pick<UserType, "username" | "password">) => Promise<ErrorOrSuccessReturn>,
-  logOut: () => void
+  logOut: () => void,
+  changeUsername: (userId: string, newUsername: string) => Promise<ErrorOrSuccessReturn>,
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => Promise<ErrorOrSuccessReturn>,
+  changeProfilePicture: (userId: string, profileImage: string) => Promise<ErrorOrSuccessReturn>
 };
 
 export type ErrorOrSuccessReturn = { error: string } | { success: string };
@@ -69,7 +72,6 @@ const UserProvider = ({children}: ChildProps) => {
 
   const logInUser = async (userLoginInfo: Pick<UserType, 'username' | 'password'>): Promise<ErrorOrSuccessReturn> => {
     try{
-      console.log('user login info', userLoginInfo)
       const res = await fetch(`/api/users/login`, {
         method: 'POST',
         headers: {
@@ -77,14 +79,12 @@ const UserProvider = ({children}: ChildProps) => {
         },
         body: JSON.stringify(userLoginInfo)
       });
-      console.log("res front", res);
 
       if(res.status === 401){
         const error = await res.json();
         return error;
       } else {
         const data = await res.json();
-        console.log("ok data:",data)
         setLoggedInUser(data)
         return { success: "Successfuly logged In!" }
       }
@@ -93,11 +93,79 @@ const UserProvider = ({children}: ChildProps) => {
       console.error(err)
       return { error: 'Server Error! Something went wrong while logging in'}
     }
-  }
+  };
 
   const logOut = () => {
     setLoggedInUser(null);
   }
+
+  const changeUsername = async (userId: string, newUsername: string): Promise<ErrorOrSuccessReturn> => {
+    try{
+      const res = await fetch(`/api/users/${userId}/username`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username: newUsername })
+      });
+      if(res.status === 409){
+        const errorMsg = await res.json();
+        return errorMsg;
+      } else {
+        const data = await res.json();
+        setLoggedInUser(data);
+        return { success: 'Username successfully changed!' };
+      }
+    } catch(err){
+      console.error(err);
+      return { error: "Server error occurred while changing username" };
+    }
+  };
+
+  const changePassword = async (userId: string, oldPassword: string, newPassword: string): Promise<ErrorOrSuccessReturn> => {
+    try{
+      const res = await fetch(`/api/users/${userId}/password`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+      if(res.status === 401){
+        const errorMsg = await res.json();
+        console.log(errorMsg)
+        return errorMsg;
+      } else {
+        return { success: 'Password successfully changed!' };
+      }
+    } catch(err){
+      console.error(err);
+      return { error: "Server error occurred while changing password" };
+    }
+  };
+
+  const changeProfilePicture = async (userId: string, profileImage: string): Promise<ErrorOrSuccessReturn> => {
+    try {
+      const res = await fetch(`/api/users/${userId}/profileImage`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ profileImage })
+      });
+      if (res.status === 200) {
+        const data = await res.json();
+        setLoggedInUser(data);
+        return { success: 'Profile picture successfully changed!' };
+      } else {
+        const errorMsg = await res.json();
+        return errorMsg;
+      }
+    } catch (err) {
+      console.error(err);
+      return { error: "Server error occurred while changing profile picture" };
+    }
+  };
 
   useEffect(() => {
     fetch('/api/users')
@@ -116,7 +184,10 @@ const UserProvider = ({children}: ChildProps) => {
         loggedInUser,
         registerUser,
         logInUser,
-        logOut
+        logOut,
+        changeUsername,
+        changePassword,
+        changeProfilePicture
       }}
     >
       {children}

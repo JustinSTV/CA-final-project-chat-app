@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { MongoClient } from "mongodb";
+import { Collection, MongoClient } from "mongodb";
 import cors from "cors";
 import { v4 as generateID } from "uuid";
 import bcrypt from "bcrypt";
@@ -58,8 +58,6 @@ const checkUniqueUser = async (req, res, next) => {
       .collection('users')
       .findOne({username: req.body.username});
 
-      console.log("checking:", sameUsername);
-
       if(sameUsername){
         res.status(409).send({error: "Username already exists!"});
       } else{
@@ -109,19 +107,16 @@ app.post("/users", checkUniqueUser, async (req, res) => {
 app.post("/users/login", async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try{
-    console.log("Ateinanti info iš fronto: ", req.body);
 
     const data = await client
       .db('chat_app')
       .collection('users')
       .findOne({username: req.body.username})
-    console.log("Data is DB: ", data);
 
     if(data === null){ //? wrong username
       res.status(401).send({ error: "User not Found!"});
     } else{ //? user was found by username
       const checkPassword = await bcrypt.compare(req.body.password, data.password);
-      console.log('password check', checkPassword)
 
       if(!checkPassword){
         res.status(401).send({error: "Wrong password!"});
@@ -135,3 +130,93 @@ app.post("/users/login", async (req, res) => {
     client.close();
   }
 })
+
+// PATCH, edit users username
+app.patch('/users/:id/username', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try{
+    const id = req.params.id;
+    const newUsername = req.body.username;
+
+    const user = await client
+    .db('chat_app')
+    .collection('users')
+    .findOne({ _id: id });
+
+    if (user.username === newUsername) {
+      return res.status(409).send({ error: "Cannot change to the same username" });
+    }
+
+    const patchResponse = await client
+    .db('chat_app')
+    .collection('users')
+    .findOneAndUpdate(
+      { _id: id },
+      { $set: { username: newUsername } },
+      { returnDocument: 'after' }
+    )
+    res.send(patchResponse);
+  } catch(err){
+    res.status(500).send(err);
+  } finally{
+    client.close();
+  }
+})
+
+//PATCH, edit users password
+app.patch('/users/:id/password', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try{
+    const id = req.params.id;
+    const {oldPassword, newPassword} = req.body;
+
+
+    const user = await client
+      .db('chat_app')
+      .collection('users')
+      .findOne({_id: id});
+
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).send({ error: "Old password is incorrect" });
+    }
+
+    const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+    
+    const patchResponse = await client
+    .db('chat_app')
+    .collection('users')
+    .updateOne(
+      { _id: id },
+      { $set: { password: hashedNewPassword } }
+    );
+
+    res.send(patchResponse);
+  } catch(err){
+    res.status(500).send(err);
+  } finally{
+    client.close();
+  }
+});
+
+app.patch('/users/:id/profileImage', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const id = req.params.id;
+    const { profileImage } = req.body;
+
+    const patchResponse = await client
+      .db('chat_app')
+      .collection('users')
+      .findOneAndUpdate(
+        { _id: id },
+        { $set: { profileImage } },
+        { returnDocument: 'after' }
+      );
+    res.send(patchResponse);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
