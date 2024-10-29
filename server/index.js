@@ -306,9 +306,7 @@ app.get('/conversations/:id/messages', async (req, res) => {
       .aggregate([
         {
           $match: {
-            conversationId: {
-              $exists: true
-            }
+            conversationId: conversationId
           }
         },
         {

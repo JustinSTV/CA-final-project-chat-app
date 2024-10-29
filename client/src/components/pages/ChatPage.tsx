@@ -21,14 +21,46 @@ const StyledSection = styled.section`
     gap: 10px;
 
     >div.message{
+      display: flex;
+      align-items: center;
       background-color: #444;
       padding: 10px;
-      border-radius: 5px;
-      align-self: flex-start;
+      border-radius: 10px;
+      max-width: 80%;
+      position: relative;
+
+      >img{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+        object-fit: cover;
+      }
+      >div.message-content{
+        display: flex;
+        flex-direction: column;
+        >span{
+          font-size: 14px;
+          font-weight: bold;
+          color: #aaa;
+          margin-bottom: 5px;
+        }
+        >p{
+          font-size: 16px;
+          color: white;
+        }
+        >span.timestamp {
+          font-size: 12px;
+          color: #bbb;
+          align-self: flex-end;
+          margin-top: 5px;
+        }
+      }
     }
     >div.sender{
       align-self: flex-end;
       background-color: #1446A3;
+      max-width: 80%;
     }
   }
 
@@ -59,6 +91,7 @@ const StyledSection = styled.section`
   }
 `;
 
+
 const ChatPage = () => {
 
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -87,7 +120,7 @@ const ChatPage = () => {
     if (conversationId) {
       fetchMessages(conversationId);
     }
-  }, [conversationId, fetchMessages]);
+  }, []);
 
   return (
     <StyledSection>
@@ -97,9 +130,16 @@ const ChatPage = () => {
           key={message._id} 
           className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`}
         >
-          <p>{message.content}</p>
-          <span>{message.createdAt}</span>
-          <p>{message.senderDetails.username}</p>
+          <img 
+            src={message.senderDetails.profileImage} 
+            alt={message.senderDetails.username} 
+            className="profile-pic" 
+          />
+          <div className="message-content">
+            <span>{message.senderDetails.username}</span>
+            <p>{message.content}</p>
+            <span className="timestamp">{message.createdAt}</span>
+          </div>
         </div>
       ))}
     </div>

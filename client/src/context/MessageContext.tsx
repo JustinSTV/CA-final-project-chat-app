@@ -53,7 +53,10 @@ const MessageProvider = ({ children }: ChildProps) => {
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`);
       const data = await res.json();
-      dispatch({ type: 'setMessages', data });
+      dispatch({ 
+        type: 'setMessages',
+        data: data 
+      });
     } catch (err) {
       console.error(err);
     }
