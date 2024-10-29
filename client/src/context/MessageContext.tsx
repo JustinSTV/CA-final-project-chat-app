@@ -12,18 +12,22 @@ export type MessageType = {
   likes: UserType['_id'][]
 };
 
+export type MessageWithUserType = MessageType & {
+  senderDetails: UserType
+};
+
 export type MessageContextTypes = {
-  messages: MessageType[],
+  messages: MessageWithUserType[],
   fetchMessages: (conversationId: string) => Promise<void>,
   addMessage: (message: Omit<MessageType, "_id">) => Promise<void>
 };
 
 type ReducerActionTypeVariations =
-  { type: 'setMessages', data: MessageType[] } |
-  { type: 'addMessage', newMessage: MessageType } |
+  { type: 'setMessages', data: MessageWithUserType[] } |
+  { type: 'addMessage', newMessage: MessageWithUserType } |
   { type: 'likeMessage', messageId: string, userId: UserType['_id'] };
 
-const reducer = (state: MessageType[], action: ReducerActionTypeVariations): MessageType[] => {
+const reducer = (state: MessageWithUserType[], action: ReducerActionTypeVariations): MessageWithUserType[] => {
   switch (action.type) {
     case 'setMessages':
       return action.data;

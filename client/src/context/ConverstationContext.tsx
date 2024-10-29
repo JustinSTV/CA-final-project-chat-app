@@ -42,7 +42,6 @@ const ConverstationContext = createContext<undefined | ConversationContextTypes>
 const ConverstationProvider = ({children}: ChildProps) => {
 
   const [conversations, dispatch] = useReducer(reducer, []);
-  console.log(conversations);
 
   const startConversation = async (loggedInUserId: string, otherUserId: string): Promise<ConverstationType> => {
     try {

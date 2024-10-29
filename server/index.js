@@ -303,7 +303,24 @@ app.get('/conversations/:id/messages', async (req, res) => {
     const messages = await client
       .db('chat_app')
       .collection('messages')
-      .find({ conversationId })
+      .aggregate([
+        {
+          $match: {
+            conversationId: {
+              $exists: true
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'senderId',
+            foreignField: '_id',
+            as: 'senderDetails'
+          }
+        },
+        { $unwind: '$senderDetails' }
+      ])
       .toArray();
     res.send(messages);
   } catch (err) {
