@@ -1,9 +1,10 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import UserContext, { UserContextTypes } from "../../context/UserContext";
 import MessageContext, { MessageContextTypes, MessageWithUserType } from "../../context/MessageContext";
 import { useFormik } from "formik";
 import styled from "styled-components";
+import UserChatCard from "../UI/molecule/UserChatCard";
 
 const StyledSection = styled.section`
   display: flex;
@@ -15,53 +16,33 @@ const StyledSection = styled.section`
 
   >div.messages{
     width: 100%;
-    max-width: 600px;
+    height: 80vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding-right: 15px;
+  }
+  >::-webkit-scrollbar {
+    width: 12px;
+    background-color: #F5F5F5;
+    border-radius: 10px;
+  }
 
-    >div.message{
-      display: flex;
-      align-items: center;
-      background-color: #444;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 80%;
-      position: relative;
+  >::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background-color: #292928;
+  }
 
-      >img{
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        margin-right: 10px;
-        object-fit: cover;
-      }
-      >div.message-content{
-        display: flex;
-        flex-direction: column;
-        >span{
-          font-size: 14px;
-          font-weight: bold;
-          color: #aaa;
-          margin-bottom: 5px;
-        }
-        >p{
-          font-size: 16px;
-          color: white;
-        }
-        >span.timestamp {
-          font-size: 12px;
-          color: #bbb;
-          align-self: flex-end;
-          margin-top: 5px;
-        }
-      }
-    }
-    >div.sender{
-      align-self: flex-end;
-      background-color: #1446A3;
-      max-width: 80%;
-    }
+  >::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #676765;
+  }
+
+  >::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
 
   >form{
@@ -97,12 +78,19 @@ const ChatPage = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { loggedInUser } = useContext(UserContext) as UserContextTypes;
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (conversationId) {
       fetchMessages(conversationId);
     }
   }, [conversationId]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const formik = useFormik({
     initialValues: {
@@ -129,26 +117,17 @@ const ChatPage = () => {
         messages.length ? (
           <div className="messages">
           {messages.map((message: MessageWithUserType) => (
-            <div 
+            <UserChatCard 
               key={message._id} 
-              className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`}
-            >
-              <img 
-                src={message.senderDetails.profileImage} 
-                alt={message.senderDetails.username} 
-                className="profile-pic" 
-              />
-              <div className="message-content">
-                <span>{message.senderDetails.username}</span>
-                <p>{message.content}</p>
-                <span className="timestamp">{message.createdAt}</span>
-              </div>
-            </div>
+              message={message} 
+              loggedInUser={loggedInUser} 
+            />
           ))}
+          <div ref={messagesEndRef}/>
         </div>
         ) : (
           <>
-            <p>no messages with this user</p>
+            <p>No messages with this user</p>
           </>
         )
       }
