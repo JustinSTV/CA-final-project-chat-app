@@ -49,6 +49,23 @@ app.get('/users', async (req, res) => {
   }
 })
 
+// GET, fetch a specific user by ID
+app.get('/users/:id', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const userId = req.params.id;
+    const user = await client
+      .db('chat_app')
+      .collection('users')
+      .findOne({ _id: userId });
+    res.send(user);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
 //create new user
 const checkUniqueUser = async (req, res, next) => {
   const client = await MongoClient.connect(CONNECT_URL);
@@ -199,6 +216,7 @@ app.patch('/users/:id/password', async (req, res) => {
   }
 });
 
+//PATCH, edit user profile picture
 app.patch('/users/:id/profileImage', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
@@ -212,6 +230,164 @@ app.patch('/users/:id/profileImage', async (req, res) => {
         { _id: id },
         { $set: { profileImage } },
         { returnDocument: 'after' }
+      );
+    res.send(patchResponse);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+//GET, get user conversations
+app.get('/conversations/:userId', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const loggedInUserId = req.query.loggedInUserId;
+    const otherUserId = req.params.userId;
+
+    const conversations = await client
+      .db('chat_app')
+      .collection('conversations')
+      .find({
+        participants: { $all: [loggedInUserId, otherUserId] }
+      })
+      .toArray();
+
+    res.send(conversations);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+//POST, Create new conversations or return existing one
+app.post('/conversations', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const { loggedInUserId, otherUserId } = req.body;
+    
+    //? tikrinam ar jau yra convo sukurtas
+    const existingConversation = await client
+    .db('chat_app')
+    .collection('conversations')
+    .findOne({
+      participants: { $all: [loggedInUserId, otherUserId] }
+    });
+    
+    //? jai yra gražinam
+    if (existingConversation) {
+      res.send(existingConversation);
+    } else { //? jai nera, sukuriam
+      const newConversation = {
+        _id: generateID(),
+        participants: [loggedInUserId, otherUserId],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastMessage: {
+          content: '',
+          senderId: '',
+          createdAt: ''
+        }
+      };
+      
+      const result = await client
+      .db('chat_app')
+      .collection('conversations')
+      .insertOne(newConversation);
+      
+      const data = await client
+      .db('chat_app')
+      .collection('conversations')
+      .findOne({ _id: result.insertedId });
+      
+      res.send(data);
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+// GET, get messages for that conversation
+app.get('/conversations/:id/messages', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    //? pasiemam convo id
+    const conversationId = req.params.id;
+    const messages = await client
+      .db('chat_app')
+      .collection('messages')
+      .aggregate([
+        {
+          $match: {
+            conversationId: conversationId
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'senderId',
+            foreignField: '_id',
+            as: 'senderDetails'
+          }
+        },
+        { $unwind: '$senderDetails' }
+      ])
+      .toArray();
+    res.send(messages);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+// POST, post a new message
+app.post('/messages', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const { conversationId, senderId, content, createdAt } = req.body;
+    const newMessage = {
+      _id: generateID(),
+      conversationId,
+      senderId,
+      content,
+      createdAt,
+      likes: []
+    };
+    const result = await client
+      .db('chat_app')
+      .collection('messages')
+      .insertOne(newMessage);
+    const data = await client
+      .db('chat_app')
+      .collection('messages')
+      .findOne({ _id: result.insertedId });
+    res.send(data);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
+// PATCH, update conversations last message
+app.patch('/conversations/:id/lastMessage', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    //? pasiemam convo id
+    const conversationId = req.params.id;
+    const { content, senderId, createdAt } = req.body;
+    const patchResponse = await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId }, //? susirandam conversation pagal id
+        //? updatinam messages
+        { $set: {lastMessage: { content, senderId, createdAt }} }
       );
     res.send(patchResponse);
   } catch (err) {
