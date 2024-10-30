@@ -98,6 +98,12 @@ const ChatPage = () => {
   const { loggedInUser } = useContext(UserContext) as UserContextTypes;
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
 
+  useEffect(() => {
+    if (conversationId) {
+      fetchMessages(conversationId);
+    }
+  }, [conversationId]);
+
   const formik = useFormik({
     initialValues: {
       newMessage: ""
@@ -116,34 +122,37 @@ const ChatPage = () => {
     }
   });
 
-  useEffect(() => {
-    if (conversationId) {
-      fetchMessages(conversationId);
-    }
-  }, []);
 
   return (
     <StyledSection>
-    <div className="messages">
-      {messages.map((message: MessageWithUserType) => (
-        <div 
-          key={message._id} 
-          className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`}
-        >
-          <img 
-            src={message.senderDetails.profileImage} 
-            alt={message.senderDetails.username} 
-            className="profile-pic" 
-          />
-          <div className="message-content">
-            <span>{message.senderDetails.username}</span>
-            <p>{message.content}</p>
-            <span className="timestamp">{message.createdAt}</span>
-          </div>
+      {
+        messages.length ? (
+          <div className="messages">
+          {messages.map((message: MessageWithUserType) => (
+            <div 
+              key={message._id} 
+              className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`}
+            >
+              <img 
+                src={message.senderDetails.profileImage} 
+                alt={message.senderDetails.username} 
+                className="profile-pic" 
+              />
+              <div className="message-content">
+                <span>{message.senderDetails.username}</span>
+                <p>{message.content}</p>
+                <span className="timestamp">{message.createdAt}</span>
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-    <form onSubmit={formik.handleSubmit}>
+        ) : (
+          <>
+            <p>no messages with this user</p>
+          </>
+        )
+      }
+      <form onSubmit={formik.handleSubmit}>
         <textarea
         name="newMessage"
           value={formik.values.newMessage} 

@@ -72,7 +72,16 @@ const MessageProvider = ({ children }: ChildProps) => {
         body: JSON.stringify(message)
       });
       const newMessage = await res.json();
-      dispatch({ type: 'addMessage', newMessage });
+
+      const senderRes = await fetch(`/api/users/${message.senderId}`);
+
+      const senderDetails = await senderRes.json();
+      const newMessageWithSenderDetails = {
+        ...newMessage,
+        senderDetails
+      };
+
+      dispatch({ type: 'addMessage', newMessage: newMessageWithSenderDetails });
   
       await fetch(`/api/conversations/${message.conversationId}/lastMessage`, {
         method: 'PATCH',

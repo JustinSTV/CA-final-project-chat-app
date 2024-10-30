@@ -49,6 +49,23 @@ app.get('/users', async (req, res) => {
   }
 })
 
+// GET, fetch a specific user by ID
+app.get('/users/:id', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const userId = req.params.id;
+    const user = await client
+      .db('chat_app')
+      .collection('users')
+      .findOne({ _id: userId });
+    res.send(user);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
 //create new user
 const checkUniqueUser = async (req, res, next) => {
   const client = await MongoClient.connect(CONNECT_URL);
