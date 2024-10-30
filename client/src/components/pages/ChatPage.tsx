@@ -16,7 +16,7 @@ const StyledSection = styled.section`
 
   >div.messages{
     width: 100%;
-    height: 80vh;
+    height: 75vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -72,11 +72,32 @@ const StyledSection = styled.section`
   }
 `;
 
+const ChatHeader = styled.header`
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0 20px;
+
+  > img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  > h2 {
+    font-size: 20px;
+    color: white;
+  }
+`;
+
 
 const ChatPage = () => {
 
   const { conversationId } = useParams<{ conversationId: string }>();
-  const { loggedInUser } = useContext(UserContext) as UserContextTypes;
+  const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -110,9 +131,17 @@ const ChatPage = () => {
     }
   });
 
+  const receiver = users.find(user => user._id !== loggedInUser?._id && messages.some(message => message.senderId === user._id));
+
 
   return (
     <StyledSection>
+      {receiver && (
+        <ChatHeader>
+          <img src={receiver.profileImage} alt={receiver.username} />
+          <h2>{receiver.username}</h2>
+        </ChatHeader>
+      )}
       {
         messages.length ? (
           <div className="messages">
