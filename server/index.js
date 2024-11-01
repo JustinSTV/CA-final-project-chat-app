@@ -239,22 +239,38 @@ app.patch('/users/:id/profileImage', async (req, res) => {
   }
 });
 
-//GET, get user conversations
 app.get('/conversations/:userId', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
-    const loggedInUserId = req.query.loggedInUserId;
-    const otherUserId = req.params.userId;
+    const loggedInUserId = req.params.userId;
 
     const conversations = await client
       .db('chat_app')
       .collection('conversations')
       .find({
-        participants: { $all: [loggedInUserId, otherUserId] }
+        participants: loggedInUserId
       })
       .toArray();
 
-    res.send(conversations);
+    const createdConversations = await Promise.all(
+      conversations.map(async (conversation) => {
+        const otherUserId = conversation.participants.find(id => id !== loggedInUserId);
+
+        if (otherUserId) {
+          const otherUser = await client
+            .db('chat_app')
+            .collection('users')
+            .findOne({ _id: otherUserId });
+          
+          return {
+            ...conversation,
+            otherUserDetails: otherUser
+          };
+        }
+        return conversation;
+      })
+    );
+    res.send(createdConversations);
   } catch (err) {
     res.status(500).send(err);
   } finally {
@@ -267,7 +283,6 @@ app.post('/conversations', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
     const { loggedInUserId, otherUserId } = req.body;
-    
     //? tikrinam ar jau yra convo sukurtas
     const existingConversation = await client
     .db('chat_app')

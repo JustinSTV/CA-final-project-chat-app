@@ -1,8 +1,10 @@
 import styled from "styled-components";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserContext, {UserContextTypes} from "../../../context/UserContext";
-import UserCard from "../molecule/UserCard";
+import ConverstationContext, {ConversationContextTypes} from "../../../context/ConverstationContext";
+import UserConversationCard from "../molecule/UserConversationCard";
+
 
 const StyledHeader = styled.header`
   color: white;
@@ -51,12 +53,6 @@ const StyledHeader = styled.header`
       text-align: center;
       margin: 10px;
     }
-    >div.recentUsers{
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
   }
 
   >div.profileSection{
@@ -92,7 +88,15 @@ const StyledHeader = styled.header`
 
 const Header = () => {
   const navigate = useNavigate();
-  const {users, loggedInUser, logOut} = useContext(UserContext) as UserContextTypes;
+  const { loggedInUser, logOut } = useContext(UserContext) as UserContextTypes;
+  const { conversations, fetchConversations, loading } = useContext(ConverstationContext) as ConversationContextTypes;
+  console.log("convos", conversations)
+
+  useEffect(() => {
+    if (loggedInUser) {
+      fetchConversations(loggedInUser._id)
+    }
+  }, [loggedInUser]);
 
   return (
     <StyledHeader>
@@ -104,13 +108,10 @@ const Header = () => {
       </div>
       <div className="recentConvos">
         <h3>Recent converstaions</h3>
-        <div className="recentUsers">
-          {
-            users.map(user => (
-              <UserCard key={user._id} user={user} />
-            ))
-          }
-        </div>
+        <UserConversationCard 
+          loading={loading}
+          conversations={conversations}
+        />
       </div>
       <div className="profileSection">
         {

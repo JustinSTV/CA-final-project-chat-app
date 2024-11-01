@@ -1,4 +1,4 @@
-import { createContext, useReducer, ReactElement} from "react";
+import { createContext, useReducer, ReactElement, useState } from "react";
 import { UserType } from "./UserContext";
 
 type ChildProps = { children: ReactElement };
@@ -15,13 +15,16 @@ export type ConverstationType = {
   }
 }
 
-type ConversationWithUserType = ConverstationType & {
-  userData: UserType[]
+export type ConversationWithUserType = ConverstationType & {
+  userData: UserType[],
+  otherUserDetails: UserType
 }
 
 export type ConversationContextTypes = {
   conversations: ConversationWithUserType[],
-  startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConverstationType>
+  loading: boolean,
+  startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConverstationType>,
+  fetchConversations: (userId: string) => Promise<void>
 };
 
 type ReducerActionTypeVariations =
@@ -42,6 +45,7 @@ const ConverstationContext = createContext<undefined | ConversationContextTypes>
 const ConverstationProvider = ({children}: ChildProps) => {
 
   const [conversations, dispatch] = useReducer(reducer, []);
+  const [loading, setLoading] = useState(false);
 
   const startConversation = async (loggedInUserId: string, otherUserId: string): Promise<ConverstationType> => {
     try {
@@ -68,11 +72,26 @@ const ConverstationProvider = ({children}: ChildProps) => {
     }
   };
 
+  const fetchConversations = async (userId: string) => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/conversations/${userId}`);
+      const data = await res.json();
+      dispatch({ type: 'setConversation', data });
+    } catch (err) {
+      console.error("Error fetching conversations:", err);
+    } finally{
+      setLoading(false)
+    }
+  };
+
   return(
     <ConverstationContext.Provider
       value={{
         conversations,
-        startConversation
+        loading,
+        startConversation,
+        fetchConversations
       }}
     >
       {children}
