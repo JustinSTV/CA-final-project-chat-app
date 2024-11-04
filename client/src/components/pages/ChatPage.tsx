@@ -1,10 +1,11 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import UserContext, { UserContextTypes } from "../../context/UserContext";
+import UserContext, { UserContextTypes, UserType } from "../../context/UserContext";
 import MessageContext, { MessageContextTypes, MessageWithUserType } from "../../context/MessageContext";
 import { useFormik } from "formik";
 import styled from "styled-components";
 import UserChatCard from "../UI/molecule/UserChatCard";
+import ConverstationContext, { ConversationContextTypes } from "../../context/ConverstationContext";
 
 const StyledSection = styled.section`
   display: flex;
@@ -99,13 +100,24 @@ const ChatPage = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
+  const { getConversation } = useContext(ConverstationContext) as ConversationContextTypes;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [receiver, setReceiver] = useState<UserType | null>(null);
 
   useEffect(() => {
     if (conversationId) {
       fetchMessages(conversationId);
+      const currentConversation = getConversation(conversationId);
+
+      if (currentConversation) {
+        const otherParticipantId = currentConversation.participants.find(id => id !== loggedInUser?._id);
+        const otherUser = users.find(user => user._id === otherParticipantId);
+        setReceiver(otherUser || null);
+      }
     }
-  }, [conversationId]);
+  }, [conversationId, loggedInUser, users, conversationId]);
+
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -131,16 +143,15 @@ const ChatPage = () => {
     }
   });
 
-  const receiver = users.find(user => user._id !== loggedInUser?._id && messages.some(message => message.senderId === user._id));
-
-
   return (
     <StyledSection>
-      {receiver && (
+      {receiver ? (
         <ChatHeader>
           <img src={receiver.profileImage} alt={receiver.username} />
           <h2>{receiver.username}</h2>
         </ChatHeader>
+      ) : (
+        <p>Loading conversation...</p>
       )}
       {
         messages.length ? (

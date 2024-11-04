@@ -23,8 +23,9 @@ export type ConversationWithUserType = ConverstationType & {
 export type ConversationContextTypes = {
   conversations: ConversationWithUserType[],
   loading: boolean,
-  startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConverstationType>,
-  fetchConversations: (userId: string) => Promise<void>
+  startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConversationWithUserType>,
+  fetchConversations: (userId: string) => Promise<void>,
+  getConversation: (conversationId: string) => ConversationWithUserType | undefined
 };
 
 type ReducerActionTypeVariations =
@@ -47,7 +48,7 @@ const ConverstationProvider = ({children}: ChildProps) => {
   const [conversations, dispatch] = useReducer(reducer, []);
   const [loading, setLoading] = useState(false);
 
-  const startConversation = async (loggedInUserId: string, otherUserId: string): Promise<ConverstationType> => {
+  const startConversation = async (loggedInUserId: string, otherUserId: string): Promise<ConversationWithUserType> => {
     try {
       const res = await fetch(`/api/conversations`, {
         method: 'POST',
@@ -85,13 +86,18 @@ const ConverstationProvider = ({children}: ChildProps) => {
     }
   };
 
+  const getConversation = (conversationId: string) => {
+    return conversations.find(conv => conv._id === conversationId);
+  };
+
   return(
     <ConverstationContext.Provider
       value={{
         conversations,
         loading,
         startConversation,
-        fetchConversations
+        fetchConversations,
+        getConversation
       }}
     >
       {children}

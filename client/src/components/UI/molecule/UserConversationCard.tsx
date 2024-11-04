@@ -19,7 +19,8 @@ const StyledDiv = styled.div`
 `;
 
 const UserConversationCard = ({loading, conversations}: Props) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  console.log(conversations)
 
   const handleConvoNav = (id: string) => {
     navigate(`chat/${id}`)
@@ -32,9 +33,11 @@ const UserConversationCard = ({loading, conversations}: Props) => {
         <p>Loading conversations...</p>
       ) : conversations && conversations.length > 0 ? (
         conversations.map(convos => 
-          <div key={convos._id} onClick={() => handleConvoNav(convos._id)}>
-            {convos.otherUserDetails.username}
-          </div>
+          convos.otherUserDetails ? (
+            <div key={convos._id} onClick={() => handleConvoNav(convos._id)}>
+              {convos.otherUserDetails.username}
+            </div>
+          ) : null
         )
       ) : (
         <p>No recent conversations</p>
