@@ -116,7 +116,7 @@ const ChatPage = () => {
         setReceiver(otherUser || null);
       }
     }
-  }, [conversationId, loggedInUser, users, conversationId]);
+  }, [conversationId, loggedInUser, users]);
 
 
   useEffect(() => {

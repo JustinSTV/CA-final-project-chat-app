@@ -304,7 +304,8 @@ app.post('/conversations', async (req, res) => {
           content: '',
           senderId: '',
           createdAt: ''
-        }
+        },
+        unreadMessages: 0
       };
       
       const result = await client
@@ -360,6 +361,36 @@ app.get('/conversations/:id/messages', async (req, res) => {
   }
 });
 
+//PATCH, update unreadMessages
+app.patch('/conversations/:id/read', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const conversationId = req.params.id;
+
+    await client
+      .db('chat_app')
+      .collection('messages')
+      .updateMany(
+        { conversationId },
+        { $set: { read: true } }
+      );
+
+    await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId },
+        { $set: { unreadMessages: 0 } }
+      );
+
+    res.send({ success: true });
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
 // POST, post a new message
 app.post('/messages', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
@@ -371,12 +402,23 @@ app.post('/messages', async (req, res) => {
       senderId,
       content,
       createdAt,
-      likes: []
+      likes: [],
+      read: false
     };
     const result = await client
       .db('chat_app')
       .collection('messages')
       .insertOne(newMessage);
+
+    // Update unread message count
+    await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId },
+        { $inc: { unreadMessages: 1 } }
+      );
+
     const data = await client
       .db('chat_app')
       .collection('messages')

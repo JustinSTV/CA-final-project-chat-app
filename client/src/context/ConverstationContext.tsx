@@ -17,7 +17,8 @@ export type ConverstationType = {
 
 export type ConversationWithUserType = ConverstationType & {
   userData: UserType[],
-  otherUserDetails: UserType
+  otherUserDetails: UserType,
+  unreadMessages: number;
 }
 
 export type ConversationContextTypes = {
@@ -25,12 +26,15 @@ export type ConversationContextTypes = {
   loading: boolean,
   startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConversationWithUserType>,
   fetchConversations: (userId: string) => Promise<void>,
-  getConversation: (conversationId: string) => ConversationWithUserType | undefined
+  getConversation: (conversationId: string) => ConversationWithUserType | undefined,
+  markConversationAsRead: (conversationId: string) => Promise<void>
 };
 
 type ReducerActionTypeVariations =
 { type: 'setConversation', data: ConversationWithUserType[] } |
-{ type: 'startConversation', newConversation: ConversationWithUserType }
+{ type: 'startConversation', newConversation: ConversationWithUserType } |
+{ type: 'markAsRead'; conversationId: string };
+
 
 const reducer = (state: ConversationWithUserType[], action: ReducerActionTypeVariations): ConversationWithUserType[]  => {
   switch(action.type){
@@ -38,6 +42,12 @@ const reducer = (state: ConversationWithUserType[], action: ReducerActionTypeVar
       return action.data;
     case 'startConversation':
       return [...state, action.newConversation]
+    case 'markAsRead':
+      return state.map(convo =>
+        convo._id === action.conversationId ? { ...convo, unreadMessages: 0 } : convo
+      );
+    default:
+      return state;
   }
 }
 
@@ -86,6 +96,20 @@ const ConverstationProvider = ({children}: ChildProps) => {
     }
   };
 
+  const markConversationAsRead = async (conversationId: string) => {
+    try {
+      await fetch(`/api/conversations/${conversationId}/read`, {
+        method: 'PATCH'
+      });
+      dispatch({
+        type: 'markAsRead',
+        conversationId
+      });
+    } catch (err) {
+      console.error("Error marking conversation as read:", err);
+    }
+  };
+
   const getConversation = (conversationId: string) => {
     return conversations.find(conv => conv._id === conversationId);
   };
@@ -97,7 +121,8 @@ const ConverstationProvider = ({children}: ChildProps) => {
         loading,
         startConversation,
         fetchConversations,
-        getConversation
+        getConversation,
+        markConversationAsRead
       }}
     >
       {children}

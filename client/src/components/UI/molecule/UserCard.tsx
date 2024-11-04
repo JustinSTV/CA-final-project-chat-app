@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import UserContext, { UserContextTypes, UserType } from "../../../context/UserContext";
 
 const StyledDiv = styled.div`
+  cursor: pointer;
   background-color: #676765;
   border-radius: 10px;
   color: white;

@@ -19,7 +19,7 @@ export type MessageWithUserType = MessageType & {
 export type MessageContextTypes = {
   messages: MessageWithUserType[],
   fetchMessages: (conversationId: string) => Promise<void>,
-  addMessage: (message: Omit<MessageType, "_id">) => Promise<void>
+  addMessage: (message: Omit<MessageType, "_id">) => Promise<void>,
 };
 
 type ReducerActionTypeVariations =
@@ -107,7 +107,7 @@ const MessageProvider = ({ children }: ChildProps) => {
       value={{ 
         messages,
         fetchMessages,
-        addMessage
+        addMessage,
       }}>
       {children}
     </MessageContext.Provider>

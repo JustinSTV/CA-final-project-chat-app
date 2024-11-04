@@ -5,7 +5,6 @@ import UserContext, {UserContextTypes} from "../../../context/UserContext";
 import ConverstationContext, {ConversationContextTypes} from "../../../context/ConverstationContext";
 import UserConversationCard from "../molecule/UserConversationCard";
 
-
 const StyledHeader = styled.header`
   color: white;
   height: 100vh;
@@ -90,7 +89,6 @@ const Header = () => {
   const navigate = useNavigate();
   const { loggedInUser, logOut } = useContext(UserContext) as UserContextTypes;
   const { conversations, fetchConversations, loading } = useContext(ConverstationContext) as ConversationContextTypes;
-  console.log("convos", conversations)
 
   useEffect(() => {
     if (loggedInUser) {
