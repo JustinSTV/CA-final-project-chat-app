@@ -81,7 +81,10 @@ const MessageProvider = ({ children }: ChildProps) => {
         senderDetails
       };
 
-      dispatch({ type: 'addMessage', newMessage: newMessageWithSenderDetails });
+      dispatch({ 
+        type: 'addMessage', 
+        newMessage: newMessageWithSenderDetails 
+      });
   
       await fetch(`/api/conversations/${message.conversationId}/lastMessage`, {
         method: 'PATCH',

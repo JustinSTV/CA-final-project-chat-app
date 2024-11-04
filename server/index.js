@@ -396,13 +396,19 @@ app.patch('/conversations/:id/lastMessage', async (req, res) => {
     //? pasiemam convo id
     const conversationId = req.params.id;
     const { content, senderId, createdAt } = req.body;
+
     const patchResponse = await client
       .db('chat_app')
       .collection('conversations')
       .updateOne(
         { _id: conversationId }, //? susirandam conversation pagal id
         //? updatinam messages
-        { $set: {lastMessage: { content, senderId, createdAt }} }
+        { 
+          $set: {
+            lastMessage: { content, senderId, createdAt },
+            updatedAt: new Date().toISOString()
+          } 
+        }
       );
     res.send(patchResponse);
   } catch (err) {
