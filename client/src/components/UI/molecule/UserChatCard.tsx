@@ -1,15 +1,18 @@
-import { MessageWithUserType } from "../../../context/MessageContext";
+import { useContext } from "react";
+import MessageContext ,{ MessageContextTypes, MessageWithUserType } from "../../../context/MessageContext";
 import { UserType } from "../../../context/UserContext";
 import { formatDistanceToNow } from "date-fns";
 import styled from "styled-components";
+import { FaHeart } from "react-icons/fa";
 
 const StyledMessage = styled.div`
   display: flex;
   align-items: center;
+  gap: 10px;
   background-color: #444;
   padding: 10px;
   border-radius: 10px;
-  max-width: 80%;
+  max-width: 450px;
   position: relative;
 
   &.sender {
@@ -48,6 +51,17 @@ const StyledMessage = styled.div`
       margin-top: 5px;
     }
   }
+  > .like-button {
+    cursor: pointer;
+    margin-left: auto;
+  }
+  > .like-button.liked {
+    color: red;
+  }
+
+  > .like-button.sender-liked {
+    color: red;
+  }
 `;
 
 type UserChatCardProps = {
@@ -56,8 +70,24 @@ type UserChatCardProps = {
 };
 
 const UserChatCard = ({ message, loggedInUser }: UserChatCardProps) => {
+
+  const { likeMessage } = useContext(MessageContext) as MessageContextTypes;
+
+  const handleLike = async () => {
+    if (loggedInUser && message.senderId !== loggedInUser._id) {
+      const isLiked = message.likes.includes(loggedInUser._id);
+      await likeMessage(message._id, loggedInUser._id, isLiked);
+    }
+  };
+
+  const likedByLoggedInUser = message.likes.includes(loggedInUser?._id || "");
+  const messageFromLoggedInUser = message.senderId === loggedInUser?._id;
+
   return (
-    <StyledMessage className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`}>
+    <StyledMessage className={`message ${message.senderId === loggedInUser?._id ? 'sender' : ''}`} >
+      {messageFromLoggedInUser && message.likes.length > 0 && (
+        <FaHeart className="like-button sender-liked" />
+      )}
       <img 
         src={message.senderDetails.profileImage} 
         alt={message.senderDetails.username} 
@@ -70,6 +100,12 @@ const UserChatCard = ({ message, loggedInUser }: UserChatCardProps) => {
           {`Sent ${formatDistanceToNow(new Date(message.createdAt))} ago`}
         </span>
       </div>
+      {!messageFromLoggedInUser && (
+        <FaHeart 
+        className={`like-button ${likedByLoggedInUser ? 'liked' : ''}`}
+          onClick={handleLike}
+        />
+      )}
     </StyledMessage>
   );
 };

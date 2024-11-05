@@ -20,6 +20,7 @@ export type MessageContextTypes = {
   messages: MessageWithUserType[],
   fetchMessages: (conversationId: string) => Promise<void>,
   addMessage: (message: Omit<MessageType, "_id">) => Promise<void>,
+  likeMessage: (messageId: string, userId: string, isLiked: boolean) => Promise<void>
 };
 
 type ReducerActionTypeVariations =
@@ -36,7 +37,12 @@ const reducer = (state: MessageWithUserType[], action: ReducerActionTypeVariatio
     case 'likeMessage':
       return state.map(message =>
         message._id === action.messageId
-          ? { ...message, likes: [...message.likes, action.userId] }
+          ? {
+              ...message,
+              likes: message.likes.includes(action.userId)
+                ? message.likes.filter(id => id !== action.userId)
+                : [...message.likes, action.userId]
+            }
           : message
       );
     default:
@@ -102,12 +108,32 @@ const MessageProvider = ({ children }: ChildProps) => {
     }
   };
 
+  const likeMessage = async (messageId: string, userId: string, isLiked: boolean) => {
+    try {
+      await fetch(`/api/messages/${messageId}/like`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userId, isLiked })
+      });
+      dispatch({ 
+        type: 'likeMessage', 
+        messageId, 
+        userId 
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <MessageContext.Provider 
       value={{ 
         messages,
         fetchMessages,
         addMessage,
+        likeMessage
       }}>
       {children}
     </MessageContext.Provider>
