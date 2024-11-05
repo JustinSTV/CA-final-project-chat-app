@@ -459,3 +459,37 @@ app.patch('/conversations/:id/lastMessage', async (req, res) => {
     client.close();
   }
 });
+
+// PATCH, like a message
+app.patch('/messages/:id/like', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+        const messageId = req.params.id;
+    const { userId, isLiked } = req.body;
+
+    const message = await client
+      .db('chat_app')
+      .collection('messages')
+      .findOne({ _id: messageId });
+
+    if (message.senderId === userId) {
+      return res.status(400).send({ error: "Cannot like your own message" });
+    }
+
+    const updateResponse = await client
+      .db('chat_app')
+      .collection('messages')
+      .updateOne(
+        { _id: messageId },
+        isLiked
+          ? { $pull: { likes: userId } }
+          : { $addToSet: { likes: userId } }
+      );
+
+    res.send(updateResponse);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
