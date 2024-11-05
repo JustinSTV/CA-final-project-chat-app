@@ -239,22 +239,38 @@ app.patch('/users/:id/profileImage', async (req, res) => {
   }
 });
 
-//GET, get user conversations
 app.get('/conversations/:userId', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
-    const loggedInUserId = req.query.loggedInUserId;
-    const otherUserId = req.params.userId;
+    const loggedInUserId = req.params.userId;
 
     const conversations = await client
       .db('chat_app')
       .collection('conversations')
       .find({
-        participants: { $all: [loggedInUserId, otherUserId] }
+        participants: loggedInUserId
       })
       .toArray();
 
-    res.send(conversations);
+    const createdConversations = await Promise.all(
+      conversations.map(async (conversation) => {
+        const otherUserId = conversation.participants.find(id => id !== loggedInUserId);
+
+        if (otherUserId) {
+          const otherUser = await client
+            .db('chat_app')
+            .collection('users')
+            .findOne({ _id: otherUserId });
+          
+          return {
+            ...conversation,
+            otherUserDetails: otherUser
+          };
+        }
+        return conversation;
+      })
+    );
+    res.send(createdConversations);
   } catch (err) {
     res.status(500).send(err);
   } finally {
@@ -267,7 +283,6 @@ app.post('/conversations', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
     const { loggedInUserId, otherUserId } = req.body;
-    
     //? tikrinam ar jau yra convo sukurtas
     const existingConversation = await client
     .db('chat_app')
@@ -289,7 +304,8 @@ app.post('/conversations', async (req, res) => {
           content: '',
           senderId: '',
           createdAt: ''
-        }
+        },
+        unreadMessages: 0
       };
       
       const result = await client
@@ -345,6 +361,36 @@ app.get('/conversations/:id/messages', async (req, res) => {
   }
 });
 
+//PATCH, update unreadMessages
+app.patch('/conversations/:id/read', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const conversationId = req.params.id;
+
+    await client
+      .db('chat_app')
+      .collection('messages')
+      .updateMany(
+        { conversationId },
+        { $set: { read: true } }
+      );
+
+    await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId },
+        { $set: { unreadMessages: 0 } }
+      );
+
+    res.send({ success: true });
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
 // POST, post a new message
 app.post('/messages', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
@@ -356,12 +402,23 @@ app.post('/messages', async (req, res) => {
       senderId,
       content,
       createdAt,
-      likes: []
+      likes: [],
+      read: false
     };
     const result = await client
       .db('chat_app')
       .collection('messages')
       .insertOne(newMessage);
+
+    // Update unread message count
+    await client
+      .db('chat_app')
+      .collection('conversations')
+      .updateOne(
+        { _id: conversationId },
+        { $inc: { unreadMessages: 1 } }
+      );
+
     const data = await client
       .db('chat_app')
       .collection('messages')
@@ -381,13 +438,19 @@ app.patch('/conversations/:id/lastMessage', async (req, res) => {
     //? pasiemam convo id
     const conversationId = req.params.id;
     const { content, senderId, createdAt } = req.body;
+
     const patchResponse = await client
       .db('chat_app')
       .collection('conversations')
       .updateOne(
         { _id: conversationId }, //? susirandam conversation pagal id
         //? updatinam messages
-        { $set: {lastMessage: { content, senderId, createdAt }} }
+        { 
+          $set: {
+            lastMessage: { content, senderId, createdAt },
+            updatedAt: new Date().toISOString()
+          } 
+        }
       );
     res.send(patchResponse);
   } catch (err) {

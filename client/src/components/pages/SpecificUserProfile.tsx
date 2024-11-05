@@ -35,7 +35,7 @@ const SpecificUserProfile = () => {
   const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
   const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
-  const { conversations, startConversation } = useContext(ConverstationContext) as ConversationContextTypes;
+  const { startConversation } = useContext(ConverstationContext) as ConversationContextTypes;
   const user = users.find((user) => user.username === username);
 
   if (!user) {
@@ -43,9 +43,6 @@ const SpecificUserProfile = () => {
   }
 
   const handleStartChat = async () => {
-    console.log("Starting chat with user:", user.username);
-    console.log("logged in user: ", loggedInUser?.username);
-    console.log("Conversations with that user: ", conversations)
     if(loggedInUser){
       const newConversation = await startConversation(loggedInUser._id, user._id);
       navigate(`/chat/${newConversation._id}`)
