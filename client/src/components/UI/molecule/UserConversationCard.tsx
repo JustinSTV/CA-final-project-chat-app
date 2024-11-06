@@ -6,9 +6,10 @@ import styled from "styled-components";
 type Props = {
   loading: boolean;
   conversations: ConversationWithUserType[];
+  isExpanded: boolean;
 }
 
-const StyledDiv = styled.div`
+const StyledDiv = styled.div<{ isExpanded: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,7 +17,7 @@ const StyledDiv = styled.div`
 
   >div{
     cursor: pointer;
-    background-color: #676765;
+    background-color: ${({ isExpanded }) => (isExpanded ? '#676765' : 'transparent')};
     border-radius: 10px;
     color: white;
     height: 100px;
@@ -49,9 +50,20 @@ const StyledDiv = styled.div`
       font-weight: bold;
     }
   }
+
+  @media (min-width: 700px) {
+    >p{
+      display: none;
+    }
+    >div{
+      width: 200px;
+      display: flex;
+      justify-content: center;
+    }
+  }
 `;
 
-const UserConversationCard = ({loading, conversations}: Props) => {
+const UserConversationCard = ({loading, conversations, isExpanded}: Props) => {
   const navigate = useNavigate();
   const { markConversationAsRead } = useContext(ConverstationContext) as ConversationContextTypes;
 
@@ -61,7 +73,7 @@ const UserConversationCard = ({loading, conversations}: Props) => {
   }
 
   return (
-    <StyledDiv>
+    <StyledDiv isExpanded={isExpanded}>
       {
       loading ? (
         <p>Loading conversations...</p>
@@ -70,8 +82,8 @@ const UserConversationCard = ({loading, conversations}: Props) => {
           convos.otherUserDetails ? (
             <div key={convos._id} onClick={() => handleConvoNav(convos._id)}>
               <img src={convos.otherUserDetails.profileImage} alt={convos.otherUserDetails.username} />
-              <p>{convos.otherUserDetails.username}</p>
-              {convos.unreadMessages > 0 && (
+              {isExpanded && <p>{convos.otherUserDetails.username}</p>}
+              {isExpanded && convos.unreadMessages > 0 && (
                 <div className="notification-bubble">
                   {convos.unreadMessages}
                 </div>
