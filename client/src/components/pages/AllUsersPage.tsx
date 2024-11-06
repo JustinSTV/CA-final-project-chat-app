@@ -20,6 +20,11 @@ const StyledSection = styled.section`
     gap: 20px;
     place-items: center;
   }
+
+  @media (min-width: 700px) {
+    width: 100%;
+    padding: 50px 15px;
+  }
 `
 
 const AllUsersPage = () => {

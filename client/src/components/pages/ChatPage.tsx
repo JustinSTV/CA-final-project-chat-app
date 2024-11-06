@@ -71,6 +71,11 @@ const StyledSection = styled.section`
       cursor: pointer;
     }
   }
+
+  @media (min-width: 700px) {
+    width: 100%;
+    padding: 50px 15px;
+  }
 `;
 
 const ChatHeader = styled.header`

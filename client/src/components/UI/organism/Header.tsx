@@ -11,17 +11,19 @@ import UserConversationCard from "../molecule/UserConversationCard";
 const StyledHeader = styled.header<{ isExpanded: boolean }>`
   color: white;
   height: 100vh;
-  width: ${({ isExpanded }) => (isExpanded ? '30%' : '60px')};
+  width: ${({ isExpanded }) => (isExpanded ? '40%' : '60px')};
   background-color: #292928;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: width 0.3s ease;
-  position: ${({ isExpanded }) => (isExpanded ? 'fixed' : 'relative')};
+  /* position: ${({ isExpanded }) => (isExpanded ? 'fixed' : 'relative')}; */
+  position: fixed;
   z-index: ${({ isExpanded }) => (isExpanded ? 10 : 1)};
+  top: 0;
+  left: 0;
 
   > .toggleBtn {
-    /* margin: 20px auto; */
     margin: ${({ isExpanded }) => (isExpanded ? '10px auto' : '10px auto')};
     cursor: pointer;
     z-index: 11;
@@ -92,7 +94,7 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
         height: 50px;
       }
       >p{
-        display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')}; /* Show username only when expanded */
+        display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
       }
     }
     >button{
@@ -104,7 +106,7 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
       background-color: #1446A3;
       font-size: 14px;
       color: white;
-      display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')}; //Show logout only when expanded
+      display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
     }
   }
 
@@ -118,6 +120,17 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     width: ${({ isExpanded }) => (isExpanded ? '40%' : '70px')};
     overflow: hidden;
   }
+`
+
+const Overlay = styled.div<{ isExpanded: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
+  z-index: 9;
 `
 
 const Header = () => {
@@ -137,6 +150,8 @@ const Header = () => {
   };
 
   return (
+    <>
+    <Overlay isExpanded={isExpanded} onClick={toggleHeader} />
     <StyledHeader isExpanded={isExpanded}>
       <CiMenuBurger className="toggleBtn" onClick={toggleHeader} />
       <div className="logo">
@@ -146,7 +161,7 @@ const Header = () => {
         <button onClick={() => navigate('/users')}>All users</button>
       </div>
       <div className="recentConvos">
-        <h3>Recent converstaions</h3>
+        <h3>Recent conversations</h3>
         <UserConversationCard 
           loading={loading}
           conversations={conversations}
@@ -154,17 +169,16 @@ const Header = () => {
         />
       </div>
       <div className="profileSection">
-        {
-          loggedInUser && (
-            <div onClick={() => navigate(`/profile/${loggedInUser.username}`)}>
-              <img src={loggedInUser.profileImage} alt={loggedInUser.username} />
-              <p>{loggedInUser.username}</p>
-            </div>
-          )
-        }
+        {loggedInUser && (
+          <div onClick={() => navigate(`/profile/${loggedInUser.username}`)}>
+            <img src={loggedInUser.profileImage} alt={loggedInUser.username} />
+            <p>{loggedInUser.username}</p>
+          </div>
+        )}
         <button onClick={() => logOut()}>Logout</button>
       </div>
     </StyledHeader>
+  </>
   );
 }
  

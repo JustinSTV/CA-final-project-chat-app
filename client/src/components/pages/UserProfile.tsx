@@ -106,6 +106,11 @@ const StyledSection = styled.section`
       }
     }
   }
+
+  @media (min-width: 700px) {
+    width: 100%;
+    padding: 50px 15px;
+  }
 `
 
 const UserProfile = () => {
