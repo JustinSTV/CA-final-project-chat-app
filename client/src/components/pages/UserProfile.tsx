@@ -115,9 +115,15 @@ const StyledSection = styled.section`
       margin-top: 0;
     }
 
-    >div.profilePic > img{
-      height: 100px;
-      width: 100px;
+    >div.profilePic{
+      flex-direction: column;
+      >img{
+        height: 100px;
+        width: 100px;
+      }
+      >div.pfpInput{
+        align-items: center;
+      }
     }
 
     >div.usernameAndPassword{
@@ -126,14 +132,28 @@ const StyledSection = styled.section`
     }
   }
 
-  @media (max-width: 600px) {
+  @media (min-width: 481px) and (max-width: 767px){
     width: 100%;
+    gap: 25px;
+    padding: 25px 15px;
+
+    >h2{
+      margin-top: 0;
+    }
 
     >div.profilePic{
       flex-direction: column;
+      >img{
+        height: 100px;
+        width: 100px;
+      }
       >div.pfpInput{
         align-items: center;
       }
+    }
+
+    >div.usernameAndPassword{
+      flex-direction: column;
     }
   }
 `

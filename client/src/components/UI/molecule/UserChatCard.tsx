@@ -74,8 +74,8 @@ const StyledMessage = styled.div`
     }
   }
 
-  @media (max-width: 600px) {
-    max-width: 400px;
+  @media (min-width: 481px) and (max-width: 767px) {
+    max-width: 300px;
   }
 `;
 
