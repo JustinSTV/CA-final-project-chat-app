@@ -51,7 +51,7 @@ const StyledDiv = styled.div<{ isExpanded: boolean }>`
     }
   }
 
-  @media (min-width: 700px) {
+  @media (max-width: 700px) {
     >p{
       display: none;
     }

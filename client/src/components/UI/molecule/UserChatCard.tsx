@@ -67,6 +67,10 @@ const StyledMessage = styled.div`
   > .like-button.sender-liked {
     color: red;
   }
+
+  @media (max-width: 600px) {
+    max-width: 400px;
+  }
 `;
 
 type UserChatCardProps = {

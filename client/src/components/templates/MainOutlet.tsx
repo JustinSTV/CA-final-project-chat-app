@@ -8,8 +8,8 @@ const StyledMain = styled.main`
   position: relative;
   margin-left: 60px;
 
-  @media (min-width: 700px) {
-    margin-left: 70px;
+  @media (max-width: 600px) {
+    margin-left: 110px;
   }
 `
 const MainOutlet = () => {

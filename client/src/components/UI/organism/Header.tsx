@@ -11,13 +11,12 @@ import UserConversationCard from "../molecule/UserConversationCard";
 const StyledHeader = styled.header<{ isExpanded: boolean }>`
   color: white;
   height: 100vh;
-  width: ${({ isExpanded }) => (isExpanded ? '40%' : '60px')};
+  width: ${({ isExpanded }) => (isExpanded ? '40%' : '100px')};
   background-color: #292928;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: width 0.3s ease;
-  /* position: ${({ isExpanded }) => (isExpanded ? 'fixed' : 'relative')}; */
   position: fixed;
   z-index: ${({ isExpanded }) => (isExpanded ? 10 : 1)};
   top: 0;
@@ -81,7 +80,7 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: ${({ isExpanded }) => (isExpanded ? '0 20px': '0')};
+    /* padding: ${({ isExpanded }) => (isExpanded ? '0 20px': '0')}; */
     >div{
       cursor: pointer;
       display: flex;
@@ -116,9 +115,13 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
   }
 
-  @media (min-width: 700px) {
-    width: ${({ isExpanded }) => (isExpanded ? '40%' : '70px')};
+  @media (max-width: 600px) {
+    width: ${({ isExpanded }) => (isExpanded ? '40%' : '100px')};
     overflow: hidden;
+
+    .profileSection{
+      padding: 0 10px;
+    }
   }
 `
 

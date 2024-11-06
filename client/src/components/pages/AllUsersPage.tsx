@@ -21,7 +21,7 @@ const StyledSection = styled.section`
     place-items: center;
   }
 
-  @media (min-width: 700px) {
+  @media (max-width: 600px) {
     width: 100%;
     padding: 50px 15px;
   }
