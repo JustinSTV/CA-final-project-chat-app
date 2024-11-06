@@ -75,6 +75,10 @@ const StyledSection = styled.section`
   @media (min-width: 481px) and (max-width: 767px) {
     width: 100%;
   }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 100%;
+  }
 `;
 
 const ChatHeader = styled.header`

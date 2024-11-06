@@ -156,6 +156,10 @@ const StyledSection = styled.section`
       flex-direction: column;
     }
   }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 100%;
+  }
 `
 
 const UserProfile = () => {
