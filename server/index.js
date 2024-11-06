@@ -239,6 +239,7 @@ app.patch('/users/:id/profileImage', async (req, res) => {
   }
 });
 
+//GET, get every conversation of logged in user
 app.get('/conversations/:userId', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {

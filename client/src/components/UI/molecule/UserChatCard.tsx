@@ -31,6 +31,8 @@ const StyledMessage = styled.div`
   > .message-content {
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    overflow: hidden;
 
     > span {
       font-size: 14px;
@@ -42,6 +44,7 @@ const StyledMessage = styled.div`
     > p {
       font-size: 16px;
       color: white;
+      word-wrap: break-word;
     }
 
     > .timestamp {
@@ -54,6 +57,8 @@ const StyledMessage = styled.div`
   > .like-button {
     cursor: pointer;
     margin-left: auto;
+    font-size: 16px;
+    flex-shrink: 0;
   }
   > .like-button.liked {
     color: red;
