@@ -68,6 +68,12 @@ const StyledMessage = styled.div`
     color: red;
   }
 
+  @media (max-width: 480px){
+    &.sender{
+      max-width: 300px;
+    }
+  }
+
   @media (max-width: 600px) {
     max-width: 400px;
   }

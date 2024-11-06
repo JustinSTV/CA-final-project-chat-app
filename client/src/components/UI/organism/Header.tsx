@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 import styled from "styled-components";
@@ -11,14 +11,14 @@ import UserConversationCard from "../molecule/UserConversationCard";
 const StyledHeader = styled.header<{ isExpanded: boolean }>`
   color: white;
   height: 100vh;
-  width: ${({ isExpanded }) => (isExpanded ? '40%' : '100px')};
+  width: ${({ isExpanded }) => (isExpanded ? '50%' : '100px')};
   background-color: #292928;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: width 0.3s ease;
   position: fixed;
-  z-index: ${({ isExpanded }) => (isExpanded ? 10 : 1)};
+  z-index: 10;
   top: 0;
   left: 0;
 
@@ -80,7 +80,7 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
-    /* padding: ${({ isExpanded }) => (isExpanded ? '0 20px': '0')}; */
+    padding: ${({ isExpanded }) => (isExpanded ? '0 20px': '0')};
     >div{
       cursor: pointer;
       display: flex;
@@ -115,13 +115,23 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
   }
 
-  @media (max-width: 600px) {
-    width: ${({ isExpanded }) => (isExpanded ? '40%' : '100px')};
+  @media (max-width: 480px){
+    >div.profileSection{
+      padding: 0 10px;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 767px) {
+    width: ${({ isExpanded }) => (isExpanded ? '50%' : '100px')};
     overflow: hidden;
 
     .profileSection{
       padding: 0 10px;
     }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+  /* styles for tablets and small laptops */
   }
 `
 
@@ -131,16 +141,16 @@ const Overlay = styled.div<{ isExpanded: boolean }>`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
   z-index: 9;
 `
 
-const Header = () => {
+const Header = ({ isExpanded, setIsExpanded }: { isExpanded: boolean, setIsExpanded: (isExpanded: boolean) => void }) => {
   const navigate = useNavigate();
   const { loggedInUser, logOut } = useContext(UserContext) as UserContextTypes;
   const { conversations, fetchConversations, loading } = useContext(ConverstationContext) as ConversationContextTypes;
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (loggedInUser) {

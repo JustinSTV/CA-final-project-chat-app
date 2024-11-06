@@ -107,9 +107,27 @@ const StyledSection = styled.section`
     }
   }
 
+  @media (max-width: 480px){
+    padding: 20px 15px;
+    gap: 30px;
+
+    h2{
+      margin-top: 0;
+    }
+
+    >div.profilePic > img{
+      height: 100px;
+      width: 100px;
+    }
+
+    >div.usernameAndPassword{
+      flex-direction: column;
+      gap: 40px;
+    }
+  }
+
   @media (max-width: 600px) {
     width: 100%;
-    padding: 50px 15px;
 
     >div.profilePic{
       flex-direction: column;

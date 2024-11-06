@@ -72,9 +72,8 @@ const StyledSection = styled.section`
     }
   }
 
-  @media (max-width: 600px) {
+  @media (min-width: 481px) and (max-width: 767px) {
     width: 100%;
-    padding: 50px 15px;
   }
 `;
 
