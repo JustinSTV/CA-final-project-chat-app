@@ -253,6 +253,7 @@ app.get('/conversations/:userId', async (req, res) => {
       })
       .toArray();
 
+    //? pasiemam convos masyva
     const createdConversations = await Promise.all(
       conversations.map(async (conversation) => {
         const otherUserId = conversation.participants.find(id => id !== loggedInUserId);
@@ -364,11 +365,13 @@ app.get('/conversations/:id/messages', async (req, res) => {
       .collection('messages')
       .aggregate([
         {
+          //? filtering messages by conversationId
           $match: {
             conversationId: conversationId
           }
         },
         {
+          //? useris kuris išsiunte žinute
           $lookup: {
             from: 'users',
             localField: 'senderId',
@@ -376,6 +379,7 @@ app.get('/conversations/:id/messages', async (req, res) => {
             as: 'senderDetails'
           }
         },
+        //? pasiemam objekta
         { $unwind: '$senderDetails' }
       ])
       .toArray();
@@ -391,8 +395,10 @@ app.get('/conversations/:id/messages', async (req, res) => {
 app.patch('/conversations/:id/read', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
   try {
+    //? pasiemam convo id
     const conversationId = req.params.id;
 
+    //? update conversation to read
     await client
       .db('chat_app')
       .collection('messages')
@@ -401,6 +407,7 @@ app.patch('/conversations/:id/read', async (req, res) => {
         { $set: { read: true } }
       );
 
+    //? kai perskaito, atnaujiname atgal į 0
     await client
       .db('chat_app')
       .collection('conversations')
@@ -436,7 +443,7 @@ app.post('/messages', async (req, res) => {
       .collection('messages')
       .insertOne(newMessage);
 
-    // Update unread message count
+    //? pridedame kiek neperskaitytu žinučiu yra
     await client
       .db('chat_app')
       .collection('conversations')

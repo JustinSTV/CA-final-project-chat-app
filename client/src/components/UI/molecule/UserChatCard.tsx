@@ -90,12 +90,15 @@ const UserChatCard = ({ message, loggedInUser }: UserChatCardProps) => {
 
   const handleLike = async () => {
     if (loggedInUser && message.senderId !== loggedInUser._id) {
+      //? checking if message is already liked
       const isLiked = message.likes.includes(loggedInUser._id);
       await likeMessage(message._id, loggedInUser._id, isLiked);
     }
   };
 
+  //? ar jau uzdetas like
   const likedByLoggedInUser = message.likes.includes(loggedInUser?._id || "");
+  //? ar žinute iš prisijungusio userio
   const messageFromLoggedInUser = message.senderId === loggedInUser?._id;
 
   return (
