@@ -1,11 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import UserContext, { UserContextTypes, UserType } from "../../context/UserContext";
-import MessageContext, { MessageContextTypes, MessageWithUserType } from "../../context/MessageContext";
+import { useParams, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import styled from "styled-components";
+import UserContext, { UserContextTypes, UserType } from "../../context/UserContext";
+import MessageContext, { MessageContextTypes, MessageWithUserType } from "../../context/MessageContext";
 import UserChatCard from "../UI/molecule/UserChatCard";
 import ConverstationContext, { ConversationContextTypes } from "../../context/ConverstationContext";
+
+import { MdDelete } from "react-icons/md";
 
 const StyledSection = styled.section`
   display: flex;
@@ -82,33 +84,45 @@ const StyledSection = styled.section`
 `;
 
 const ChatHeader = styled.header`
-  align-self: flex-start;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   width: 100%;
   padding: 0 20px;
 
-  > img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
+  >div{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    > img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    > h2 {
+      font-size: 20px;
+      color: white;
+    }
   }
 
-  > h2 {
-    font-size: 20px;
-    color: white;
+  >svg{
+    font-size: 30px;
+    color: red;
+    cursor: pointer;
   }
 `;
 
 
 const ChatPage = () => {
 
+  const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
   const { users, loggedInUser } = useContext(UserContext) as UserContextTypes;
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
-  const { getConversation } = useContext(ConverstationContext) as ConversationContextTypes;
+  const { getConversation, deleteConversation } = useContext(ConverstationContext) as ConversationContextTypes;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [receiver, setReceiver] = useState<UserType | null>(null);
@@ -151,12 +165,20 @@ const ChatPage = () => {
     }
   });
 
+  const handleDelete = (conversationId: string) => {
+    deleteConversation(conversationId)
+    navigate(`/profile/${loggedInUser?.username}`)
+  }
+
   return (
     <StyledSection>
       {receiver ? (
         <ChatHeader>
-          <img src={receiver.profileImage} alt={receiver.username} />
-          <h2>{receiver.username}</h2>
+          <div>
+            <img src={receiver.profileImage} alt={receiver.username} />
+            <h2>{receiver.username}</h2>
+          </div>
+          <MdDelete onClick={() => conversationId && handleDelete(conversationId)} />
         </ChatHeader>
       ) : (
         <p>Loading conversation...</p>

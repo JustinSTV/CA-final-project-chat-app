@@ -27,13 +27,15 @@ export type ConversationContextTypes = {
   startConversation: (loggedInUserId: string, otherUserId: string) => Promise<ConversationWithUserType>,
   fetchConversations: (userId: string) => Promise<void>,
   getConversation: (conversationId: string) => ConversationWithUserType | undefined,
-  markConversationAsRead: (conversationId: string) => Promise<void>
+  markConversationAsRead: (conversationId: string) => Promise<void>,
+  deleteConversation: (conversationId: string) => Promise<void>
 };
 
 type ReducerActionTypeVariations =
 { type: 'setConversation', data: ConversationWithUserType[] } |
 { type: 'startConversation', newConversation: ConversationWithUserType } |
-{ type: 'markAsRead'; conversationId: string };
+{ type: 'markAsRead'; conversationId: string } |
+{ type: 'delete', id: string }
 
 
 const reducer = (state: ConversationWithUserType[], action: ReducerActionTypeVariations): ConversationWithUserType[]  => {
@@ -46,6 +48,8 @@ const reducer = (state: ConversationWithUserType[], action: ReducerActionTypeVar
       return state.map(convo =>
         convo._id === action.conversationId ? { ...convo, unreadMessages: 0 } : convo
       );
+    case 'delete':
+      return state.filter(conversation => conversation._id !== action.id)
     default:
       return state;
   }
@@ -114,6 +118,20 @@ const ConverstationProvider = ({children}: ChildProps) => {
     return conversations.find(conv => conv._id === conversationId);
   };
 
+  const deleteConversation = async (conversationId:string): Promise<void> => {
+    try{
+      await fetch(`/api/conversations/${conversationId}`, {
+        method: 'DELETE'
+      });
+      dispatch({
+        type: 'delete',
+        id: conversationId
+      })
+    } catch(err){
+      console.log(err)
+    }
+  }
+
   return(
     <ConverstationContext.Provider
       value={{
@@ -122,7 +140,8 @@ const ConverstationProvider = ({children}: ChildProps) => {
         startConversation,
         fetchConversations,
         getConversation,
-        markConversationAsRead
+        markConversationAsRead,
+        deleteConversation
       }}
     >
       {children}
