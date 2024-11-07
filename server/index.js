@@ -286,12 +286,17 @@ app.delete('/conversations/:id', async (req, res) => {
     const conversationId = req.params.id;
 
     // Delete the conversation
-    const result = await client
+    const deleteConvo = await client
       .db('chat_app')
       .collection('conversations')
       .deleteOne({ _id: conversationId });
 
-    res.send(result);
+    const deleteConvoMessages = await client
+    .db('chat_app')
+    .collection('messages')
+    .deleteMany({ conversationId: conversationId });
+
+    res.send({ deleteConvo, deleteConvoMessages});
   } catch (err) {
     res.status(500).send(err);
   } finally {
