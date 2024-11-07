@@ -106,6 +106,61 @@ const StyledSection = styled.section`
       }
     }
   }
+
+  @media (max-width: 480px){
+    padding: 20px 15px;
+    gap: 30px;
+
+    h2{
+      margin-top: 0;
+    }
+
+    >div.profilePic{
+      flex-direction: column;
+      >img{
+        height: 100px;
+        width: 100px;
+      }
+      >div.pfpInput{
+        align-items: center;
+      }
+    }
+
+    >div.usernameAndPassword{
+      flex-direction: column;
+      gap: 40px;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 767px){
+    width: 100%;
+    gap: 30px;
+    padding: 25px 15px;
+
+    >h2{
+      margin-top: 0;
+    }
+
+    >div.profilePic{
+      flex-direction: column;
+      >img{
+        height: 150px;
+        width: 150px;
+      }
+      >div.pfpInput{
+        align-items: center;
+      }
+    }
+
+    >div.usernameAndPassword{
+      flex-direction: column;
+      gap: 15px;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 100%;
+  }
 `
 
 const UserProfile = () => {

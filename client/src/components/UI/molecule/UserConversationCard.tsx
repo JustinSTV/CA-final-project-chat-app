@@ -6,9 +6,10 @@ import styled from "styled-components";
 type Props = {
   loading: boolean;
   conversations: ConversationWithUserType[];
+  isExpanded: boolean;
 }
 
-const StyledDiv = styled.div`
+const StyledDiv = styled.div<{ isExpanded: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,7 +17,7 @@ const StyledDiv = styled.div`
 
   >div{
     cursor: pointer;
-    background-color: #676765;
+    background-color: ${({ isExpanded }) => (isExpanded ? '#676765' : 'transparent')};
     border-radius: 10px;
     color: white;
     height: 100px;
@@ -49,9 +50,35 @@ const StyledDiv = styled.div`
       font-weight: bold;
     }
   }
+
+  @media (min-width: 481px) and (max-width: 767px){
+    >p{
+      display: none;
+    }
+    >div{
+      width: 300px;
+      display: flex;
+      justify-content: ${({ isExpanded }) => (isExpanded ? 'flex-start' : 'center')};
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px){
+    >p{
+      display: none;
+    }
+    >div{
+      justify-content: ${({ isExpanded }) => (isExpanded ? 'flex-start' : 'center')};
+    }
+  }
+
+  @media (min-width: 1025px) and (max-width: 1440px){
+    >div{
+      max-width: 200px;
+    }
+  }
 `;
 
-const UserConversationCard = ({loading, conversations}: Props) => {
+const UserConversationCard = ({loading, conversations, isExpanded}: Props) => {
   const navigate = useNavigate();
   const { markConversationAsRead } = useContext(ConverstationContext) as ConversationContextTypes;
 
@@ -61,7 +88,7 @@ const UserConversationCard = ({loading, conversations}: Props) => {
   }
 
   return (
-    <StyledDiv>
+    <StyledDiv isExpanded={isExpanded}>
       {
       loading ? (
         <p>Loading conversations...</p>
@@ -70,8 +97,8 @@ const UserConversationCard = ({loading, conversations}: Props) => {
           convos.otherUserDetails ? (
             <div key={convos._id} onClick={() => handleConvoNav(convos._id)}>
               <img src={convos.otherUserDetails.profileImage} alt={convos.otherUserDetails.username} />
-              <p>{convos.otherUserDetails.username}</p>
-              {convos.unreadMessages > 0 && (
+              {isExpanded && <p>{convos.otherUserDetails.username}</p>}
+              {isExpanded && convos.unreadMessages > 0 && (
                 <div className="notification-bubble">
                   {convos.unreadMessages}
                 </div>

@@ -71,6 +71,14 @@ const StyledSection = styled.section`
       cursor: pointer;
     }
   }
+
+  @media (max-width: 480px){
+    padding: 50px 15px;
+  }
+
+  @media (min-width: 1025px){
+    width: 100%;
+  }
 `;
 
 const ChatHeader = styled.header`
