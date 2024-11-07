@@ -279,6 +279,26 @@ app.get('/conversations/:userId', async (req, res) => {
   }
 });
 
+// DELETE, delete a conversation by ID
+app.delete('/conversations/:id', async (req, res) => {
+  const client = await MongoClient.connect(CONNECT_URL);
+  try {
+    const conversationId = req.params.id;
+
+    // Delete the conversation
+    const result = await client
+      .db('chat_app')
+      .collection('conversations')
+      .deleteOne({ _id: conversationId });
+
+    res.send(result);
+  } catch (err) {
+    res.status(500).send(err);
+  } finally {
+    client.close();
+  }
+});
+
 //POST, Create new conversations or return existing one
 app.post('/conversations', async (req, res) => {
   const client = await MongoClient.connect(CONNECT_URL);
