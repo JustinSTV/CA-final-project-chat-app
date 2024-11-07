@@ -11,16 +11,16 @@ import UserConversationCard from "../molecule/UserConversationCard";
 const StyledHeader = styled.header<{ isExpanded: boolean }>`
   color: white;
   height: 100vh;
-  width: ${({ isExpanded }) => (isExpanded ? '50%' : '100px')};
+  width: ${({ isExpanded }) => (isExpanded ? '100%' : '100px')};
   background-color: #292928;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: width 0.3s ease;
-  position: fixed;
-  z-index: 10;
+  z-index: 100;
   top: 0;
   left: 0;
+  position: ${({ isExpanded }) => (isExpanded ? 'fixed' : 'relative')};
 
   > .toggleBtn {
     margin: ${({ isExpanded }) => (isExpanded ? '10px auto' : '10px auto')};
@@ -109,29 +109,14 @@ const StyledHeader = styled.header<{ isExpanded: boolean }>`
     }
   }
 
-  > .allUsersBtn,
-  > .recentConvos,
-  > .profileSection {
-    display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
-  }
-
-  @media (max-width: 480px){
-    >div.profileSection{
-      padding: 0 10px;
+  @media (min-width: 1025px) {
+    width: 100%;
+    position: relative;
+    left: 0;
+    transition: none;
+    > .toggleBtn {
+      display: none;
     }
-  }
-
-  @media (min-width: 481px) and (max-width: 767px) {
-    width: ${({ isExpanded }) => (isExpanded ? '50%' : '100px')};
-    overflow: hidden;
-
-    .profileSection{
-      padding: 0 10px;
-    }
-  }
-
-  @media (min-width: 768px) and (max-width: 1024px) {
-  /* styles for tablets and small laptops */
   }
 `
 
@@ -144,22 +129,38 @@ const Overlay = styled.div<{ isExpanded: boolean }>`
   background: rgba(0, 0, 0, 0.3);
   display: ${({ isExpanded }) => (isExpanded ? 'block' : 'none')};
   z-index: 9;
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
 `
 
 const Header = ({ isExpanded, setIsExpanded }: { isExpanded: boolean, setIsExpanded: (isExpanded: boolean) => void }) => {
   const navigate = useNavigate();
   const { loggedInUser, logOut } = useContext(UserContext) as UserContextTypes;
   const { conversations, fetchConversations, loading } = useContext(ConverstationContext) as ConversationContextTypes;
-  // const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (loggedInUser) {
       fetchConversations(loggedInUser._id)
     }
+    
+    const handleResize = () => {
+      if (window.innerWidth >= 1025) {
+        setIsExpanded(true);
+      }
+    };
+    
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    
+    return () => window.removeEventListener("resize", handleResize);
   }, [loggedInUser]);
 
   const toggleHeader = () => {
-    setIsExpanded(!isExpanded);
+    if (window.innerWidth < 1025) {
+      setIsExpanded(!isExpanded);
+    }
   };
 
   return (

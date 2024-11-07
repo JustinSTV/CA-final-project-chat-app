@@ -134,7 +134,7 @@ const StyledSection = styled.section`
 
   @media (min-width: 481px) and (max-width: 767px){
     width: 100%;
-    gap: 25px;
+    gap: 30px;
     padding: 25px 15px;
 
     >h2{
@@ -144,8 +144,8 @@ const StyledSection = styled.section`
     >div.profilePic{
       flex-direction: column;
       >img{
-        height: 100px;
-        width: 100px;
+        height: 150px;
+        width: 150px;
       }
       >div.pfpInput{
         align-items: center;
@@ -154,6 +154,7 @@ const StyledSection = styled.section`
 
     >div.usernameAndPassword{
       flex-direction: column;
+      gap: 15px;
     }
   }
 

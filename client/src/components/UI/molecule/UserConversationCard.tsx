@@ -56,9 +56,24 @@ const StyledDiv = styled.div<{ isExpanded: boolean }>`
       display: none;
     }
     >div{
-      width: 200px;
+      width: 300px;
       display: flex;
-      justify-content: center;
+      justify-content: ${({ isExpanded }) => (isExpanded ? 'flex-start' : 'center')};
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px){
+    >p{
+      display: none;
+    }
+    >div{
+      justify-content: ${({ isExpanded }) => (isExpanded ? 'flex-start' : 'center')};
+    }
+  }
+
+  @media (min-width: 1025px) and (max-width: 1440px){
+    >div{
+      max-width: 200px;
     }
   }
 `;

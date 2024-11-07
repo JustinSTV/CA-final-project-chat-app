@@ -72,11 +72,11 @@ const StyledSection = styled.section`
     }
   }
 
-  @media (min-width: 481px) and (max-width: 767px) {
-    width: 100%;
+  @media (max-width: 480px){
+    padding: 50px 15px;
   }
 
-  @media (min-width: 768px) and (max-width: 1024px) {
+  @media (min-width: 1025px){
     width: 100%;
   }
 `;
