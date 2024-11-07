@@ -128,8 +128,10 @@ const ChatPage = () => {
   const [receiver, setReceiver] = useState<UserType | null>(null);
 
   useEffect(() => {
+    //? checking convo id
     if (conversationId) {
       fetchMessages(conversationId);
+      //? getting current convo info by id
       const currentConversation = getConversation(conversationId);
 
       if (currentConversation) {
