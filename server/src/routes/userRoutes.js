@@ -1,10 +1,8 @@
-import 'dotenv/config'
 import { Router } from 'express';
-import { MongoClient } from 'mongodb';
 import bcrypt from "bcrypt";
 import { v4 as generateID } from "uuid";
 
-import { connectToDB } from '../MongoClient';
+import { connectToDB } from '../MongoClient.js';
 
 
 const router = Router();
@@ -20,6 +18,7 @@ router.get('/', async (req, res) => {
     res.send(data);
   } catch (err) {
     res.status(500).send({ error: err });
+    console.error("getting users:", err)
   } finally {
     if (client) {
       client.close();
@@ -121,6 +120,7 @@ router.post("/login", async (req, res) => {
     }
   }catch(err){
     res.status(500).send(err);
+    console.error('logging in error:', err)
   } finally{
     client.close();
   }

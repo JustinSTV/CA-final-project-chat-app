@@ -1,43 +1,12 @@
-import "dotenv/config";
-import express from "express";
-import { Collection, MongoClient } from "mongodb";
-import cors from "cors";
-import { v4 as generateID } from "uuid";
-import bodyParser from "body-parser";
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { Router } from 'express';
 
-import userRoutes from './src/routes/userRoutes.js'
+import { connectToDB } from '../MongoClient.js'
 
-const CONNECT_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_USER_PASSWORD}@${process.env.DB_CLUSTER_NAME}.${process.env.DB_CLUSTER_ID}.mongodb.net/`;
-
-const app = express();
-const PORT = process.env.SERVER_PORT;
-const corsOptions = {
-  origin: `http://localhost:${process.env.FRONT_PORT}`,
-};
-
-app.use(express.json({limit: "10mb"}));
-app.use(cors(corsOptions));
-
-//image
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ extended:true }));
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-app.use(express.static(path.join(__dirname, '../client/public')));
-
-app.use('/users', userRoutes);
-
-app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));
-
-
+const router = Router();
 
 //GET, get every conversation of logged in user
-app.get('/conversations/:userId', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.get('/:userId', async (req, res) => {
+  const client = await connectToDB();
   try {
     const loggedInUserId = req.params.userId;
 
@@ -77,8 +46,8 @@ app.get('/conversations/:userId', async (req, res) => {
 });
 
 // DELETE, delete a conversation by ID
-app.delete('/conversations/:id', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.delete('/:id', async (req, res) => {
+  const client = await connectToDB();
   try {
     const conversationId = req.params.id;
 
@@ -102,8 +71,8 @@ app.delete('/conversations/:id', async (req, res) => {
 });
 
 //POST, Create new conversations or return existing one
-app.post('/conversations', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.post('/', async (req, res) => {
+  const client = await connectToDB();
   try {
     const { loggedInUserId, otherUserId } = req.body;
     //? tikrinam ar jau yra convo sukurtas
@@ -151,8 +120,8 @@ app.post('/conversations', async (req, res) => {
 });
 
 // GET, get messages for that conversation
-app.get('/conversations/:id/messages', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.get('/:id/messages', async (req, res) => {
+  const client = await connectToDB();
   try {
     //? pasiemam convo id
     const conversationId = req.params.id;
@@ -188,8 +157,8 @@ app.get('/conversations/:id/messages', async (req, res) => {
 });
 
 //PATCH, update unreadMessages
-app.patch('/conversations/:id/read', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.patch('/:id/read', async (req, res) => {
+  const client = await connectToDB();
   try {
     //? pasiemam convo id
     const conversationId = req.params.id;
@@ -220,49 +189,9 @@ app.patch('/conversations/:id/read', async (req, res) => {
   }
 });
 
-// POST, post a new message
-app.post('/messages', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
-  try {
-    const { conversationId, senderId, content, createdAt } = req.body;
-    const newMessage = {
-      _id: generateID(),
-      conversationId,
-      senderId,
-      content,
-      createdAt,
-      likes: [],
-      read: false
-    };
-    const result = await client
-      .db('chat_app')
-      .collection('messages')
-      .insertOne(newMessage);
-
-    //? pridedame kiek neperskaitytu žinučiu yra
-    await client
-      .db('chat_app')
-      .collection('conversations')
-      .updateOne(
-        { _id: conversationId },
-        { $inc: { unreadMessages: 1 } }
-      );
-
-    const data = await client
-      .db('chat_app')
-      .collection('messages')
-      .findOne({ _id: result.insertedId });
-    res.send(data);
-  } catch (err) {
-    res.status(500).send(err);
-  } finally {
-    client.close();
-  }
-});
-
 // PATCH, update conversations last message
-app.patch('/conversations/:id/lastMessage', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
+router.patch('/:id/lastMessage', async (req, res) => {
+  const client = await connectToDB();
   try {
     //? pasiemam convo id
     const conversationId = req.params.id;
@@ -289,36 +218,5 @@ app.patch('/conversations/:id/lastMessage', async (req, res) => {
   }
 });
 
-// PATCH, like a message
-app.patch('/messages/:id/like', async (req, res) => {
-  const client = await MongoClient.connect(CONNECT_URL);
-  try {
-        const messageId = req.params.id;
-    const { userId, isLiked } = req.body;
 
-    const message = await client
-      .db('chat_app')
-      .collection('messages')
-      .findOne({ _id: messageId });
-
-    if (message.senderId === userId) {
-      return res.status(400).send({ error: "Cannot like your own message" });
-    }
-
-    const updateResponse = await client
-      .db('chat_app')
-      .collection('messages')
-      .updateOne(
-        { _id: messageId },
-        isLiked
-          ? { $pull: { likes: userId } }
-          : { $addToSet: { likes: userId } }
-      );
-
-    res.send(updateResponse);
-  } catch (err) {
-    res.status(500).send(err);
-  } finally {
-    client.close();
-  }
-});
+export default router;
