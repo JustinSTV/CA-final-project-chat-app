@@ -151,6 +151,7 @@ router.get('/:id/messages', async (req, res) => {
     res.send(messages);
   } catch (err) {
     res.status(500).send(err);
+    console.error(err)
   } finally {
     client.close();
   }

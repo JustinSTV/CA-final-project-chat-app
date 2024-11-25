@@ -2,12 +2,19 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import styled from "styled-components";
+
 import UserContext, { UserContextTypes, UserType } from "../../context/UserContext";
 import MessageContext, { MessageContextTypes, MessageWithUserType } from "../../context/MessageContext";
 import UserChatCard from "../UI/molecule/UserChatCard";
 import ConverstationContext, { ConversationContextTypes } from "../../context/ConverstationContext";
 
 import { MdDelete } from "react-icons/md";
+
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:5500");
+
+
 
 const StyledSection = styled.section`
   display: flex;
@@ -155,13 +162,15 @@ const ChatPage = () => {
     },
     onSubmit: async (values, { resetForm }) => {
       if (values.newMessage && loggedInUser && conversationId) {
-        await addMessage({
+        const message = {
           conversationId,
           senderId: loggedInUser._id,
           content: values.newMessage,
           createdAt: new Date().toISOString(),
           likes: []
-        });
+        }
+        await addMessage(message);
+        socket.emit("message", message);
         resetForm();
       }
     }
@@ -171,6 +180,13 @@ const ChatPage = () => {
     deleteConversation(conversationId)
     navigate(`/profile/${loggedInUser?.username}`)
   }
+
+  useEffect(() => {
+    socket.on("message", (msg) => {
+      console.log("message from server: ", msg);
+      fetchMessages(conversationId!);
+    });
+  }, [conversationId]);
 
   return (
     <StyledSection>
