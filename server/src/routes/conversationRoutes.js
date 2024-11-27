@@ -28,7 +28,7 @@ router.get('/:userId', async (req, res) => {
             .db('chat_app')
             .collection('users')
             .findOne({ _id: otherUserId });
-          
+
           return {
             ...conversation,
             otherUserDetails: otherUser
@@ -40,8 +40,6 @@ router.get('/:userId', async (req, res) => {
     res.send(createdConversations);
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 
@@ -58,15 +56,13 @@ router.delete('/:id', async (req, res) => {
       .deleteOne({ _id: conversationId });
 
     const deleteConvoMessages = await client
-    .db('chat_app')
-    .collection('messages')
-    .deleteMany({ conversationId: conversationId });
+      .db('chat_app')
+      .collection('messages')
+      .deleteMany({ conversationId: conversationId });
 
-    res.send({ deleteConvo, deleteConvoMessages});
+    res.send({ deleteConvo, deleteConvoMessages });
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 
@@ -77,12 +73,12 @@ router.post('/', async (req, res) => {
     const { loggedInUserId, otherUserId } = req.body;
     //? tikrinam ar jau yra convo sukurtas
     const existingConversation = await client
-    .db('chat_app')
-    .collection('conversations')
-    .findOne({
-      participants: { $all: [loggedInUserId, otherUserId] }
-    });
-    
+      .db('chat_app')
+      .collection('conversations')
+      .findOne({
+        participants: { $all: [loggedInUserId, otherUserId] }
+      });
+
     //? jai yra gražinam
     if (existingConversation) {
       res.send(existingConversation);
@@ -99,23 +95,21 @@ router.post('/', async (req, res) => {
         },
         unreadMessages: 0
       };
-      
+
       const result = await client
-      .db('chat_app')
-      .collection('conversations')
-      .insertOne(newConversation);
-      
+        .db('chat_app')
+        .collection('conversations')
+        .insertOne(newConversation);
+
       const data = await client
-      .db('chat_app')
-      .collection('conversations')
-      .findOne({ _id: result.insertedId });
-      
+        .db('chat_app')
+        .collection('conversations')
+        .findOne({ _id: result.insertedId });
+
       res.send(data);
     }
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 
@@ -152,8 +146,6 @@ router.get('/:id/messages', async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
     console.error(err)
-  } finally {
-    client.close();
   }
 });
 
@@ -185,8 +177,6 @@ router.patch('/:id/read', async (req, res) => {
     res.send({ success: true });
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 
@@ -204,18 +194,16 @@ router.patch('/:id/lastMessage', async (req, res) => {
       .updateOne(
         { _id: conversationId }, //? susirandam conversation pagal id
         //? updatinam messages
-        { 
+        {
           $set: {
             lastMessage: { content, senderId, createdAt },
             updatedAt: new Date().toISOString()
-          } 
+          }
         }
       );
     res.send(patchResponse);
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 

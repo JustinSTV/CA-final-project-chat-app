@@ -41,7 +41,7 @@ let mongoClient
 
 const startServer = async () => {
   try {
-    mongoClient = await connectToDB();
+    await connectToDB();
     console.log("MongoDB connection established, starting server...");
 
     httpServer.listen(PORT, () => {

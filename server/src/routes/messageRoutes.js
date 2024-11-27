@@ -41,8 +41,6 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
     console.error(err)
-  } finally {
-    client.close();
   }
 });
 
@@ -50,7 +48,7 @@ router.post('/', async (req, res) => {
 router.patch('/:id/like', async (req, res) => {
   const client = await connectToDB();
   try {
-        const messageId = req.params.id;
+    const messageId = req.params.id;
     const { userId, isLiked } = req.body;
 
     const message = await client
@@ -75,8 +73,6 @@ router.patch('/:id/like', async (req, res) => {
     res.send(updateResponse);
   } catch (err) {
     res.status(500).send(err);
-  } finally {
-    client.close();
   }
 });
 
