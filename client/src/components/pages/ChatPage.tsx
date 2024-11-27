@@ -131,8 +131,10 @@ const ChatPage = () => {
   const { messages, fetchMessages, addMessage } = useContext(MessageContext) as MessageContextTypes;
   const { getConversation, deleteConversation } = useContext(ConverstationContext) as ConversationContextTypes;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
 
   const [receiver, setReceiver] = useState<UserType | null>(null);
+  const [skip, setSkip] = useState(0)
 
   useEffect(() => {
     //? checking convo id
@@ -155,6 +157,28 @@ const ChatPage = () => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  const handleScroll = async () => {
+    if(messageContainerRef.current){
+      const { scrollTop } = messageContainerRef.current;
+      if(scrollTop === 0 && conversationId) {
+        const newSkip = skip + 20;
+        await fetchMessages(conversationId, newSkip);
+        setSkip(newSkip);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (messageContainerRef.current) {
+        messageContainerRef.current.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [skip, conversationId]);
 
   const formik = useFormik({
     initialValues: {
@@ -203,7 +227,7 @@ const ChatPage = () => {
       )}
       {
         messages.length ? (
-          <div className="messages">
+          <div className="messages" ref={messageContainerRef}>
           {messages.map((message: MessageWithUserType) => (
             <UserChatCard 
               key={message._id} 

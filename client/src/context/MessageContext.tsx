@@ -18,7 +18,7 @@ export type MessageWithUserType = MessageType & {
 
 export type MessageContextTypes = {
   messages: MessageWithUserType[],
-  fetchMessages: (conversationId: string) => Promise<void>,
+  fetchMessages: (conversationId: string, skip?: number) => Promise<void>
   addMessage: (message: Omit<MessageType, "_id">) => Promise<void>,
   likeMessage: (messageId: string, userId: string, isLiked: boolean) => Promise<void>
 };
@@ -55,13 +55,13 @@ const MessageContext = createContext<undefined | MessageContextTypes>(undefined)
 const MessageProvider = ({ children }: ChildProps) => {
   const [messages, dispatch] = useReducer(reducer, []);
 
-  const fetchMessages = async (conversationId: string) => {
+  const fetchMessages = async (conversationId: string, skip = 0) => {
     try {
-      const res = await fetch(`/api/conversations/${conversationId}/messages`);
+      const res = await fetch(`/api/conversations/${conversationId}/messages?skip=${skip}`);
       const data = await res.json();
       dispatch({ 
         type: 'setMessages',
-        data: data 
+        data: skip === 0 ? data.reverse() : [...data.reverse(), ...messages]
       });
     } catch (err) {
       console.error(err);

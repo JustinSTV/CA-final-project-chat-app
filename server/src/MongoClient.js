@@ -7,11 +7,12 @@ let client;
 
 export const connectToDB = async () => {
   if (!client) {
-    client = new MongoClient(CONNECT_URL);
+    client = new MongoClient(CONNECT_URL, {
+      connectTimeoutMS: 30000
+    });
   }
   try {
     await client.connect();
-    console.log("Trying connect to MongoClient...")
   } catch (err) {
     console.error("Failed to connect to MongoDB", err);
     throw err;

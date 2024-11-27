@@ -58,7 +58,7 @@ const startServer = async () => {
       console.log("A user connected:", socket.id);
 
       socket.on("message", (msg) => {
-        console.log("message: " + msg);
+        console.log("message: " + JSON.stringify(msg));
         io.emit("message", msg);
       });
 

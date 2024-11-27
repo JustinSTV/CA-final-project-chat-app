@@ -117,20 +117,18 @@ router.post('/', async (req, res) => {
 router.get('/:id/messages', async (req, res) => {
   const client = await connectToDB();
   try {
-    //? pasiemam convo id
     const conversationId = req.params.id;
+    const { limit = 20, skip = 0 } = req.query;
+
     const messages = await client
       .db('chat_app')
       .collection('messages')
       .aggregate([
+        { $match: { conversationId: conversationId } },
+        { $sort: { createdAt: -1 } },
+        { $skip: parseInt(skip) },
+        { $limit: parseInt(limit) },
         {
-          //? filtering messages by conversationId
-          $match: {
-            conversationId: conversationId
-          }
-        },
-        {
-          //? useris kuris išsiunte žinute
           $lookup: {
             from: 'users',
             localField: 'senderId',
@@ -138,14 +136,13 @@ router.get('/:id/messages', async (req, res) => {
             as: 'senderDetails'
           }
         },
-        //? pasiemam objekta
         { $unwind: '$senderDetails' }
       ])
       .toArray();
     res.send(messages);
   } catch (err) {
     res.status(500).send(err);
-    console.error(err)
+    console.error(err);
   }
 });
 
